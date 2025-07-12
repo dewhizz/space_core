@@ -1,16 +1,17 @@
 const {User}=require('../model/SpaceDB')
 const bcrypt=require('bcrypt')
+const jwt=require('jsonwebtoken')
 
 // register logic
 exports.register=async(req,res)=>{
     const{name,email,password,idNumber,secretKey}=req.body
-    console.log(name,email,password,idNumber,secretKey)
+    // console.log('incoming data',req.body)
     // verify the secret key
     if(secretKey !== process.env.secretKey){
         return res.status(403).json({message:'Unauthorized Account Creation'})
     }
     // check if the user exsists
-    const userExsist= await user.findOne({email})
+    const userExsist= await User.findOne({email})
     if(userExsist){
         return returnres.json({message:'Email Already Exsists'})
     }
@@ -25,7 +26,44 @@ exports.register=async(req,res)=>{
         isActive:true
 
     })
+    const newUser= await user.save()
+    res.json({message:"created successfully",newUser})//
 
-    res.json({message:"created successfully"})
+}
 
+// login
+exports.login=async(req,res)=>{
+    // destructure
+    const {email,password}=req.body
+    console.log("log in details",req.body)
+    // check if user email exists
+    const user=await User.findOne({email})
+    if(!user){
+        return res.status(404).json({message:'Invalid user credentials....'})
+    }
+    // check if the user is valid
+    if(!user.isActive){
+        return res.status(403).json({message:'Your account has been deactivated'})
+    }
+    // check the password
+    const isMatch =bcrypt.compare(password ,user.password)
+    if(!isMatch){
+        return res.status(401).json({message:"Invalid user credentials"})
+    }
+    // generate a token
+    const token =jwt.sign(
+        {userId:user._id,role:user.role},
+        process.env.JWT_SECRET,
+        {expiresIn:'1h'}
+    )
+    res.json({message:'log in successful',
+        token,
+        user:{
+            id:user.id,
+            name:user.name,
+            email:user.email,
+            role:user.role
+        }
+        
+    })
 }

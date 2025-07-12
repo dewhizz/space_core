@@ -6,9 +6,9 @@ const userSchema=new Schema({
     name:{type:String},
     email:{type:String,required:true,unique:true},
     password:{type:String,required:true},
-    role:{type:String,enum:['admin','tenant']},
-    idNumber:{type:String,required:true,unique:true},
-    isVerified:Boolean
+    role:{type:String,enum:['admin','tenant'],required:true},
+    idNumber:{type:String,unique:true},
+    isActive:Boolean
 },{timestamps:true})
 
 // properties
