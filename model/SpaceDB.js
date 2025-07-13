@@ -6,6 +6,7 @@ const userSchema=new Schema({
     name:{type:String},
     email:{type:String,required:true,unique:true},
     password:{type:String,required:true},
+    phone:{type:Number},
     role:{type:String},
     idNumber:{type:String,unique:true},
     isActive:Boolean
@@ -16,6 +17,7 @@ const propertySchema = new Schema(
   {
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     plotNumber: { type: String, required: true, unique: true },
+    title:{type:String},
     description: { type: String },
     propertyType: {
       type: String,
