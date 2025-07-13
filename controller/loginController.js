@@ -1,69 +1,78 @@
-const {User}=require('../model/SpaceDB')
-const bcrypt=require('bcrypt')
-const jwt=require('jsonwebtoken')
+const { User } = require('../model/SpaceDB')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+
 
 // register logic
-exports.register=async(req,res)=>{
-    const{name,email,password,idNumber,secretKey}=req.body
+exports.register = async (req, res) => {
+    const { name, email, password, idNumber, secretKey } = req.body
     // console.log('incoming data',req.body)
     // verify the secret key
-    if(secretKey !== process.env.secretKey){
-        return res.status(403).json({message:'Unauthorized Account Creation'})
-    }
+    let assignedRole;
+if (secretKey !== process.env.secretKey) {
+    return res.status(403).json({ message: 'Unauthorized Account Creation' });
+}
     // check if the user exsists
-    const userExsist= await User.findOne({email})
-    if(userExsist){
-        return returnres.json({message:'Email Already Exsists'})
+    const userExsist = await User.findOne({ email })
+    if (userExsist) {
+        return res.json({ message: 'Email Already Exsists' })
+    }
+    const idExsists=await User.findOne({idNumber})
+    if(idExsists){
+        return res.json({message:"Id Number Already Registered"})
     }
     // hashing the password
-    const hashedPassword=await bcrypt.hash(password,10)
+    const hashedPassword = await bcrypt.hash(password, 10)
     const user = new User({
         name,
         email,
-        password:hashedPassword,
+        password: hashedPassword,
         idNumber,
-        role:'tenant',
-        isActive:true
+        role:'user',
+        isActive: true
 
     })
-    const newUser= await user.save()
-    res.json({message:"created successfully",newUser})//
+    const newUser = await user.save()
+    res.status(201).json({ message: "created successfully", newUser })//
 
 }
 
 // login
-exports.login=async(req,res)=>{
+exports.login = async (req, res) => {
     // destructure
-    const {email,password}=req.body
-    console.log("log in details",req.body)
+    const { email, password } = req.body
+    console.log("log in details", req.body)
     // check if user email exists
-    const user=await User.findOne({email})
-    if(!user){
-        return res.status(404).json({message:'Invalid user credentials....'})
+    const user = await User.findOne({ email })
+    if (!user) {
+        return res.status(404).json({ message: 'Invalid user credentials....' })
     }
+    console.log(user)
     // check if the user is valid
-    if(!user.isActive){
-        return res.status(403).json({message:'Your account has been deactivated'})
+    if (!user.isActive) {
+        return res.status(403).json({ message: 'Your account has been deactivated' })
     }
     // check the password
-    const isMatch =bcrypt.compare(password ,user.password)
-    if(!isMatch){
-        return res.status(401).json({message:"Invalid user credentials"})
+    const isMatch = bcrypt.compare(password, user.password)
+    if (!isMatch) {
+        return res.status(401).json({ message: "Invalid user credentials" })
     }
-    // generate a token
-    const token =jwt.sign(
-        {userId:user._id,role:user.role},
-        process.env.JWT_SECRET,
-        {expiresIn:'1h'}
-    )
-    res.json({message:'log in successful',
+   
+// generate the jwt token
+  const token = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+ res.json({
+        message: 'log in successful',
         token,
-        user:{
-            id:user.id,
-            name:user.name,
-            email:user.email,
-            role:user.role
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role
         }
-        
+
     })
 }

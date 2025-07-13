@@ -6,7 +6,7 @@ const userSchema=new Schema({
     name:{type:String},
     email:{type:String,required:true,unique:true},
     password:{type:String,required:true},
-    role:{type:String,enum:['admin','tenant'],required:true},
+    role:{type:String},
     idNumber:{type:String,unique:true},
     isActive:Boolean
 },{timestamps:true})
@@ -14,7 +14,7 @@ const userSchema=new Schema({
 // properties
 const propertySchema = new Schema(
   {
-    adminId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     plotNumber: { type: String, required: true, unique: true },
     description: { type: String },
     propertyType: {
@@ -39,7 +39,7 @@ const propertySchema = new Schema(
 const inquirySchema=new Schema({
     propertyId:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
     tenantId:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
-    adminId:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
+    ownerId:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     message:{type:String},
     status:{type:String,enum:['pending,viewing_scheduled,responded,closed']},
     viewingDate:{type:Date}
