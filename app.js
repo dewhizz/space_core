@@ -12,9 +12,13 @@ app.use(cors())
 // static file accessibility
 app.use('/uploads',express.static('uploads'))
 
-// // login/register routes
+//  login/register routes
 const userAuth=require('./routes/loginRoutes')
 app.use('/user/Auth',userAuth)
+
+// properties routes
+const properties=require('./routes/propertyRoute')
+app.use('/api/properties',properties)
 
 // connection to the db
 mongoose.connect(process.env.MONGO_URI)
