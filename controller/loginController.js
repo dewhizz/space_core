@@ -37,6 +37,7 @@ if (secretKey !== process.env.secretKey) {
 
 }
 
+<<<<<<< Updated upstream
 // login
 exports.login = async (req, res) => {
     // destructure
@@ -76,3 +77,6 @@ exports.login = async (req, res) => {
 
     })
 }
+=======
+}
+>>>>>>> Stashed changes
