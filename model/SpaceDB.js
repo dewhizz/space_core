@@ -40,8 +40,7 @@ const propertySchema = new Schema(
 // inquiries
 const inquirySchema=new Schema({
     propertyId:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
-    tenant:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
-    owner:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
+    user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     message:{type:String},
     status:{type:String,enum:['pending,viewing_scheduled,responded,closed']},
     viewingDate:{type:Date}
@@ -50,7 +49,7 @@ const inquirySchema=new Schema({
 // bookings
 const bookingSchema=new Schema({
     propertyId:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
-    tenant:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
+    user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     startDate:{type:Date},
     endDate:{type:Date},
     leaseAgreementUrl:{type:String}

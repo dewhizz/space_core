@@ -4,7 +4,9 @@ const {Property}=require('../model/SpaceDB')
 exports.addProperty=async(req,res)=>{
     try {
         // recieve data from the client
-        const newProperty=req.body
+        const newProperty={...req.body,
+            owner:req.user.id
+        }
         console.log("incoming....",newProperty)
         const savedProperty=new Property(newProperty)
         await savedProperty.save()
@@ -14,7 +16,7 @@ exports.addProperty=async(req,res)=>{
     }
 }
 
-// fetching all classrooms
+// fetching all properties
 exports.getAllProperties=async (req,res)=>{
     try {
         const properties=await Property.find()
@@ -64,3 +66,4 @@ exports.deleteProperties=async(req,res)=>{
         res.status(500).json({message:error.message})
     }
 }
+

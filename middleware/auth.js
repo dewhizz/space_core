@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = process.env.JWT_SECRET
-
+const addProperty=require('../controller/propertyController')
 const auth = (req, res, next) => {
     // extract authorization header
     const authHeader = req.headers.authorization
@@ -11,7 +11,7 @@ const auth = (req, res, next) => {
     if (!token) return res.status(400).json({ message: 'No token provided' })
     try {
         //    verify the token using the secret key 
-        const decode = jwt.verify(token, process.env.JWT_SECRET)
+        const decode = jwt.verify(token,JWT_SECRET)
 
         return res.status(403)({ message: "Insufficient authorization" })
 
@@ -41,4 +41,4 @@ const authorizeRoles=(...allowedRoles)=>{
 }
 
 // exports
-module.exports = auth
+module.exports = {auth, authorizeRoles}
