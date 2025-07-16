@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = process.env.JWT_SECRET
-const addProperty=require('../controller/propertyController')
+
 const auth = (req, res, next) => {
     // extract authorization header
     const authHeader = req.headers.authorization

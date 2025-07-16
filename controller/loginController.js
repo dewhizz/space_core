@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
         return res.status(403).json({ message: 'Your account has been deactivated' })
     }
     // check the password
-    const isMatch = bcrypt.compare(password, user.password)
+    const isMatch =await bcrypt.compare(password, user.password)
     if (!isMatch) {
         return res.status(401).json({ message: "Invalid user credentials" })
     }
@@ -77,3 +77,13 @@ exports.login = async (req, res) => {
 
     })
 }
+
+// fetch all
+exports.getAllUsers = async (req, res) => {
+  try {
+    const user = await User.find();
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

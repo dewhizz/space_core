@@ -5,5 +5,6 @@ const auth=require('../middleware/auth')
 
 router.post('/register',loginController.register)
 router.post('/',loginController.login)
+router.get('/',loginController.getAllUsers)
 
 module.exports=router
