@@ -6,9 +6,9 @@ const propertyController = require("../controller/propertyController")
 // authorization
 const { auth, authorizeRoles } = require("../middleware/auth");
 
-router.post("/",auth,propertyController.addProperty);
+router.post("/",propertyController.addProperty);
 router.get("/",propertyController.getAllProperties);
-router.get("/:id",propertyController.getProperiesById);
+router.get("/:id",propertyController.getPropertiesById);
 router.put("/:id",auth,authorizeRoles('owner'),propertyController.updateProperty);
 router.delete("/:id",auth,authorizeRoles('owner'),propertyController.deleteProperties);
 module.exports = router;

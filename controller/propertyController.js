@@ -1,38 +1,15 @@
-const {Property,User}=require('../model/SpaceDB')
-
-// // require path to show where the file will be stored
-// const path = require('path')
-// // require the fs to create a newfile
-// const fs = require('fs')
-// // require the multer to handle files
-// const multer = require('multer')
-// // the storage location
-// const upload=multer({dest:'uploads/'})
-
-// exports.upload=[upload('photo')],async(req,res)=>{
-// // check if our request has any file
-// if(req.file){
-//     // extracting the file's extention
-//     const ext=path.extname(req.file.originalname)
-//     // renaming the file 
-//     const newFilename=Date.now()+ext
-//     // new path
-//     const newPath=path.join('uploads',newFilename)
-//     fs.renameSync(req.file.path,newPath)
-//     photo=newPath.replace(/\\/g,'/')
-//  }
-// }
-
+const {Property}=require('../model/SpaceDB')
 
 // add properties
 exports.addProperty=async(req,res)=>{
     try {
          const newProperty=req.body
+         console.log('inc',newProperty)
         // create a new property
         const savedProperty=new Property(newProperty)
         console.log('inc',savedProperty)
         await savedProperty.save()
-        res.json(savedProperty)
+        res.status(201).json(savedProperty)
     } catch (error) {
         res.status(500).json({message:error.message})
     }
@@ -51,7 +28,7 @@ exports.getAllProperties=async (req,res)=>{
 }
 
 // get one
-exports.getProperiesById=async (req,res)=>{
+exports.getPropertiesById=async (req,res)=>{
     try {
         const property = await Property.findById(req.params.id)
         .populate('owner','name email phone')
