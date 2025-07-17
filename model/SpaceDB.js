@@ -48,8 +48,8 @@ const inquirySchema=new Schema({
 
 // bookings
 const bookingSchema=new Schema({
-    propertyId:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
-    user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
+    property:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
+    createdBy:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     startDate:{type:Date},
     endDate:{type:Date},
     leaseAgreementUrl:{type:String}

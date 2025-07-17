@@ -24,6 +24,10 @@ app.use('/api/properties',properties)
 const inquiries=require('./routes/inquiryRoute')
 app.use('/api/inquiries',inquiries)
 
+// inquiry routes
+const booking=require('./routes/bookingRoute')
+app.use('/api/booking',booking)
+
 // connection to the db
 mongoose.connect(process.env.MONGO_URI)
 .then(()=>console.log("MongoDB Connected"))
