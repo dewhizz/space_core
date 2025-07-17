@@ -39,7 +39,7 @@ const propertySchema = new Schema(
 
 // inquiries
 const inquirySchema=new Schema({
-    propertyId:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
+    property:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
     user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     message:{type:String},
     status:{type:String,enum:['pending,viewing_scheduled,responded,closed']},

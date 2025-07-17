@@ -13,8 +13,6 @@ const auth = (req, res, next) => {
         //    verify the token using the secret key 
         const decode = jwt.verify(token,JWT_SECRET)
 
-        return res.status(403)({ message: "Insufficient authorization" })
-
         // we attach the payload to the request object
         // this is the logged in user
         req.user = decode

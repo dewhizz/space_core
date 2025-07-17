@@ -20,6 +20,10 @@ app.use('/user/Auth',userAuth)
 const properties=require('./routes/propertyRoute')
 app.use('/api/properties',properties)
 
+// inquiry routes
+const inquiries=require('./routes/inquiryRoute')
+app.use('/api/inquiries',inquiries)
+
 // connection to the db
 mongoose.connect(process.env.MONGO_URI)
 .then(()=>console.log("MongoDB Connected"))
