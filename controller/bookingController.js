@@ -37,7 +37,7 @@ exports.getAllBookings=async(req,res)=>{
   }
 }
 
-// fetch all
+// fetch one
 exports.getById=async(req,res)=>{
    try {
     const booking=await Booking.findById(req.params.id)
@@ -47,4 +47,35 @@ exports.getById=async(req,res)=>{
    } catch (error) {
     res.status(500).json({message:error.message})
    }
+}
+
+// update
+exports.updateBooking=async(req,res)=>{
+  try {
+    // find the booking
+    const updateBooking=await Booking.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {new:true}
+    )
+    if(!updateBooking) return res.status(404).json({message:"booking not found"})
+      res.status(201).json({message:'booking updated successfully',updateBooking})
+  } catch (error) {
+    res.status(500).json({message:error.message})
+  }
+}
+
+// delete Booking
+exports.deleteBooking=async(req,res)=>{
+  const bookingId=req.params.id
+  const existBooking=await Booking.findOneAndUpdate(bookingId)
+  if(!existBooking){
+    return res.status(200).json({message:'Booking not found'})
+  }
+  // unassign booking to createdBy
+  await Booking.updateMany(
+    {createdBy:userId},
+    {$set:{teacher:null}}
+  )
+  res.status(200).json({message:'Booking deleted successfully'})
 }

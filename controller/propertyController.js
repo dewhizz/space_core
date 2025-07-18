@@ -43,31 +43,36 @@ exports.getPropertiesById=async (req,res)=>{
 // update the property
 exports.updateProperty = async (req, res) => {
   try {
+    const userId=req.user.userId
+    const propertyId=req.params.id
     const updateData = req.body;
 
+    // check f the user exists
+    if(!userId) return res.status(401).json({message:'User not found'}) 
+
     // Check if the property exists
-    const existProperty = await Property.findById(req.params.id);
+    const existProperty = await Property.findById(propertyId);
     if (!existProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    if(existProperty.owner.toString() !== req.user.userId){
+    if(existProperty.role.owner.toString() !== req.user.userId){
         return res.status(403).json({message:'Unauthorized action'})
     }
     // Update using the same ID from req.params
     const updatedProperty = await Property.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    );
-
-    console.log('Updated Property:', updatedProperty);
-    res.status(200).json({ message: "Property updated successfully", updatedProperty });
-    
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+        req.params.id,
+        updateData,
+        { new: true }
+      );
+  
+      console.log('Updated Property:', updatedProperty);
+      res.status(200).json({ message: "Property updated successfully", updatedProperty });
+      
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 // delete property
 exports.deleteProperties=async(req,res)=>{
