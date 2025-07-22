@@ -1,21 +1,25 @@
-const {Inquiry,Property, Booking}=require('../model/SpaceDB')
+const {Inquiry, Booking}=require('../model/SpaceDB')
 
 // add booking
 exports.addBooking=async (req,res)=>{
     try {
-       const userId=req.params.id
-       const {propertyId}=req.body
+      
+       const user=req.user.userId
+       const {property,startDate,endDate}=req.body
+       const inquiry=req.params.id
 
     //    check if the user has already inquired about the property
-    const previousInquiry=await Inquiry.findOne({property:propertyId,createdBy:userId})
+    const previousInquiry=await Inquiry.findOne({inquiry})
     if(!previousInquiry){
-        return res.status(403).json({message:'You mus inquire first'})
+        return res.status(403).json({message:'You must inquire first'})
      }
         // create the booking
         const newBooking=new Booking({
-            ...req.body,
-            bookedBy:userId,
-         })
+            property,
+            startDate,
+            endDate,
+            user
+          })
          const savedBooking=await newBooking.save()
 
          res.status(200).json(savedBooking)
@@ -30,7 +34,7 @@ exports.getAllBookings=async(req,res)=>{
   try {
       const booking=await Booking.find()
     .populate('property')
-    .populate('createdBy','name email phone')
+    .populate('user','name email phone')
     res.status(200).json(booking)
   } catch (error) {
     res.status(500).json({message:error.message})
@@ -41,7 +45,7 @@ exports.getAllBookings=async(req,res)=>{
 exports.getById=async(req,res)=>{
    try {
     const booking=await Booking.findById(req.params.id)
-    .populate('createdBy','name email phone')
+    .populate('user','name email phone')
     if(!booking)return res.status(404).json({message:'Booking not found'})
         res.status(200).json(booking)
    } catch (error) {
@@ -67,15 +71,18 @@ exports.updateBooking=async(req,res)=>{
 
 // delete Booking
 exports.deleteBooking=async(req,res)=>{
-  const bookingId=req.params.id
-  const existBooking=await Booking.findOneAndUpdate(bookingId)
-  if(!existBooking){
-    return res.status(200).json({message:'Booking not found'})
+  try {
+    // extract the userId from the booking
+    const userId=req.booking.user
+     const existBooking = await Booking.findByIdAndDelete(req.params.id);
+     console.log("inc", req.params.id);
+     if (!existBooking) {
+       return res.status(404).json({ message: "Booking not found" });
+     }
+     // unassign booking to createdBy
+     await Inquiry.updateMany({ user: userId }, { $set: { user: null } });
+     res.status(200).json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).json({message:error.message})
   }
-  // unassign booking to createdBy
-  await Booking.updateMany(
-    {createdBy:userId},
-    {$set:{teacher:null}}
-  )
-  res.status(200).json({message:'Booking deleted successfully'})
 }

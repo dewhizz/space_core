@@ -49,9 +49,10 @@ const inquirySchema=new Schema({
 // bookings
 const bookingSchema=new Schema({
     property:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
-    createdBy:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
-    startDate:{type:Date},
-    endDate:{type:Date},
+    user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
+    inquiry:{type:mongoose.Schema.Types.ObjectId,ref:"Inquiry"},
+    startDate:{type:String},
+    endDate:{type:String},
     leaseAgreementUrl:{type:String}
 },{timestamps:true})
 
