@@ -10,5 +10,5 @@ router.post("/",auth,bookingController.addBooking);
 router.get("/",auth,bookingController.getAllBookings);
 router.get("/:id",auth,bookingController.getById);
 router.put("/:id",auth,bookingController.updateBooking);
-router.delete("/:id",auth,authorizeRoles('user'),bookingController.deleteBooking);
+router.delete("/:id",auth,bookingController.deleteBooking);
 module.exports = router;

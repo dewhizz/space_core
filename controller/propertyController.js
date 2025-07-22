@@ -1,12 +1,35 @@
 const {Property}=require('../model/SpaceDB')
 
+const multer =require('multer')
+const fs=require('fs')
+const path=require('path')
+
+// file location folder/directory
+const upload=multer({dest:'uploads/'})
+
 // add properties
+exports.uploadPropertyPhoto=upload.single('photo')
 exports.addProperty=async(req,res)=>{
     try {
-         const newProperty=req.body
-         console.log('inc',newProperty)
+         const {plotNumber,title,description} =req.body
+         
+       // prepare the upload file
+       let photo=null
+       if(req.file){
+            const ext=path.extname(req.file.originalname)
+            const newFileName=Date.now()+ext
+            const newPath = path.join('uploads',newFileName)
+            fs.renameSync(req.file.path,newPath)
+            photo=newPath.replace(/\\/g,'/')
+       }
+        
         // create a new property
-        const savedProperty=new Property(newProperty)
+        const savedProperty=new Property({
+             plotNumber,
+            title,
+            photo,
+            description
+        })
         console.log('inc',savedProperty)
         await savedProperty.save()
         res.status(201).json(savedProperty)
