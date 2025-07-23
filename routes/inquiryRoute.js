@@ -12,5 +12,8 @@ router.get("/:id",auth,inquiryController.getOneById);
 router.put("/:id",auth,authorizeRoles('user'),inquiryController.updateInquiry);
 router.delete("/:id", auth, authorizeRoles('user'), inquiryController.deleteInquiry);
 
+//response by the owner
+router.put("/response/:id", auth, inquiryController.respondToInquiry);
+
 
 module.exports = router;

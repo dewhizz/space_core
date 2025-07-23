@@ -45,49 +45,99 @@ exports.getPropertiesById=async (req,res)=>{
     }
 }
 
-// update the property
+// Update a property
 exports.updateProperty = async (req, res) => {
   try {
-    const userId=req.user.userId
-    const propertyId=req.params.id
+    const ownerId = req.user.userId;
+    const propertyId = req.params.id;
     const updateData = req.body;
 
-    // check if the user exists
-    if(!userId) return res.status(401).json({message:'User not found'}) 
+    // Check if the user is authenticated
+    if (!ownerId) {
+      return res.status(401).json({ message: 'User not found' });
+    }
 
     // Check if the property exists
-    const existProperty = await Property.findById(propertyId);
-    if (!existProperty) {
-      return res.status(404).json({ message: "Property not found" });
+    const existingProperty = await Property.findById(propertyId);
+    if (!existingProperty) {
+      return res.status(404).json({ message: 'Property not found' });
     }
 
-    if(existProperty.role.owner.toString() !== req.user.userId){
-        return res.status(403).json({message:'Unauthorized action'})
+    // Ensure the logged-in user is the owner of the property
+    if (existingProperty.owner.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "Unauthorized" });
     }
-    // Update using the same ID from req.params
+
+
+    // Perform the update
     const updatedProperty = await Property.findByIdAndUpdate(
-        req.params.id,
-        updateData,
-        { new: true }
-      );
-  
-      console.log('Updated Property:', updatedProperty);
-      res.status(200).json({ message: "Property updated successfully", updatedProperty });
-      
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
+      propertyId,
+      updateData,
+      { new: true } // return the updated document
+    );
+
+    res.status(200).json({
+      message: 'Property updated successfully',
+      updatedProperty
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 // delete property
 exports.deleteProperties=async(req,res)=>{
-    try {
-        // find the classroom by id
-        const deletedProperty=await Property.findByIdAndDelete(req.params.id)
-        if(!deletedProperty) return res.status(404).json({message:'property not found'})
-            res.json({message:'property deleted successfully'})
-    } catch (error) {
+   try {
+        // find the property by id first
+        const property=await Property.findById(req.params.id)
+        if(!property) return res.status(404).json({message:'Property Not Found'})
+
+        // check ownership before deleting
+        if(property.owner.toString() !==req.user.userId) return res.status(403).json({message:'Unauthorized Action'})
+
+        // delete the property
+        await Property.findByIdAndDelete(req.params.id)
+        res.json({message:"Property deleted successfully"})
+   } catch (error) {
         res.status(500).json({message:error.message})
-    }
+   }
 }
+
+
+// transfer Property Ownership
+exports.updatePropertyOwnersip = async (req, res) => {
+  try {
+    const currentOwner = req.user.userId;
+    const propertyId = req.params.id;
+    const newOwnerId = req.body;
+
+    // find the property
+    const property = await Property.findById(propertyId);
+    if (!property)
+      return res.status(404).json({ message: "Property Not Found" });
+
+    // check if the current owner exists
+    if (property.owner.toString() !== currentOwner) {
+      return res.status(403).json({ message: "Unauthorized transfer request" });
+    }
+
+    // verify existence of the new owner
+    const newOwner = await User.findOne(newOwnerId);
+    if (!newOwner) {
+      return res.status(404).json({ message: "User Not found please sign up" });
+    }
+
+    // transfer the ownership
+    property.currentOwner = newOwner;
+    await property.save();
+
+    res
+      .status(200)
+      .json({ message: "Ownership transfer successfull", property });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 

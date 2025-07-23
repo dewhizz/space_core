@@ -42,8 +42,7 @@ const inquirySchema=new Schema({
     property:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
     user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     message:{type:String},
-    status:{type:String,enum:['pending,viewing_scheduled,responded,closed']},
-    viewingDate:{type:Date}
+    response: String
 },{timestamps:true})
 
 // bookings
