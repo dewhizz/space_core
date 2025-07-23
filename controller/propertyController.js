@@ -1,13 +1,17 @@
-const {Property}=require('../model/SpaceDB')
+const {Property,User}=require('../model/SpaceDB')
 
 // add properties
 exports.addProperty=async(req,res)=>{
     try {
+        const owner=req.user.userId
          const newProperty=req.body
          console.log('inc',newProperty)
         // create a new property
-        const savedProperty=new Property(newProperty)
-        console.log('inc',savedProperty)
+        const savedProperty=new Property({
+            ...newProperty, //spreads all fields in the req.body
+            owner
+        })
+        // console.log('inc',savedProperty)
         await savedProperty.save()
         res.status(201).json(savedProperty)
     } catch (error) {
@@ -32,6 +36,7 @@ exports.getPropertiesById=async (req,res)=>{
     try {
         const property = await Property.findById(req.params.id)
         .populate('owner','name email phone')
+        console.log('inc',property)
         // check if the property exsists
         if(!property) return res.status(404).json({message:'property not found'})
             res.status(200).json(property)
@@ -47,7 +52,7 @@ exports.updateProperty = async (req, res) => {
     const propertyId=req.params.id
     const updateData = req.body;
 
-    // check f the user exists
+    // check if the user exists
     if(!userId) return res.status(401).json({message:'User not found'}) 
 
     // Check if the property exists
