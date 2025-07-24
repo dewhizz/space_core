@@ -83,6 +83,7 @@ exports.deleteInquiry = async (req, res) => {
   }
 };
 
+
 // respond to an inquiry
 exports.respondToInquiry = async (req, res) => {
   try {

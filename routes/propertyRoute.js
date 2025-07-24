@@ -13,5 +13,5 @@ router.put("/:id",auth,propertyController.updateProperty);
 router.delete("/:id",auth,propertyController.deleteProperties);
 
 // transfer ownership
-router.put('/transfer/:id',auth,propertyController.updatePropertyOwnersip)
+router.put('/transfer/:id',auth,propertyController.updatePropertyOwnership)
 module.exports = router;

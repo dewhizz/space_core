@@ -107,7 +107,7 @@ exports.deleteProperties=async(req,res)=>{
 
 
 // transfer Property Ownership
-exports.updatePropertyOwnersip = async (req, res) => {
+exports.updatePropertyOwnership = async (req, res) => {
   try {
     const currentOwner = req.user.userId;
     const propertyId = req.params.id;
