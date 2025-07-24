@@ -28,9 +28,13 @@ app.use('/api/inquiries',inquiries)
 const booking=require('./routes/bookingRoute')
 app.use('/api/booking',booking)
 
-// owner routes
+// ownerDash routes
 const owner=require('./routes/ownerRoute')
-app.use('/api/owner',booking)
+app.use('/api/owner',owner)
+
+// userDash routes
+const userDash=require('./routes/userDashRoute')
+app.use('/api/userDash',userDash)
 
 // connection to the db
 mongoose.connect(process.env.MONGO_URI)
