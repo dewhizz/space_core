@@ -8,6 +8,7 @@ const userSchema=new Schema({
     password:{type:String,required:true},
     phone:{type:Number},
     role:{type:String},
+    photo:String,
     idNumber:{type:String,unique:true},
     isActive:Boolean
 },{timestamps:true})
@@ -42,8 +43,7 @@ const inquirySchema=new Schema({
     property:{type:mongoose.Schema.Types.ObjectId,ref:'Property'},
     user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     message:{type:String},
-    status:{type:String,enum:['pending,viewing_scheduled,responded,closed']},
-    viewingDate:{type:Date}
+    response: String
 },{timestamps:true})
 
 // bookings

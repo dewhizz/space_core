@@ -73,9 +73,11 @@ exports.updateBooking=async(req,res)=>{
 exports.deleteBooking=async(req,res)=>{
   try {
     // extract the userId from the booking
-    const userId=req.booking.user
-     const existBooking = await Booking.findByIdAndDelete(req.params.id);
-     console.log("inc", req.params.id);
+    const userId=req.user.userId
+    const booking=req.params.id
+
+     const existBooking = await Booking.findByIdAndDelete(booking);
+     
      if (!existBooking) {
        return res.status(404).json({ message: "Booking not found" });
      }
