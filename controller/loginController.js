@@ -1,4 +1,4 @@
-const { User } = require('../model/SpaceDB')
+ const { User } = require('../model/SpaceDB')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
