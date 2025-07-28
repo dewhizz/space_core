@@ -1,4 +1,4 @@
-const { Property, Inquiry, Booking } = require('../model/SpaceDB');
+const { Property, Inquiry,Booking } = require('../model/SpaceDB');
 
 exports.ownerDashStats = async (req, res) => {
   try {
