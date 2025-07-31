@@ -9,7 +9,6 @@ const userSchema=new Schema({
     phone:{type:Number},
     role:{type:String},
     photo:String,
-    idNumber:{type:String,unique:true},
     isActive:Boolean
 },{timestamps:true})
 

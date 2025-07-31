@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 
 // register logic
 exports.register = async (req, res) => {
-    const { name, email, password, idNumber, secretKey } = req.body
+    const { name, email, password, secretKey } = req.body
     // console.log('incoming data',req.body)
     // verify the secret key
     let assignedRole;
@@ -17,17 +17,12 @@ if (secretKey !== process.env.secretKey) {
     if (userExsist) {
         return res.json({ message: 'Email Already Exsists' })
     }
-    const idExsists=await User.findOne({idNumber})
-    if(idExsists){
-        return res.json({message:"Id Number Already Registered"})
-    }
     // hashing the password
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = new User({
         name,
         email,
         password: hashedPassword,
-        idNumber,
         role:'user',
         isActive: true
 
