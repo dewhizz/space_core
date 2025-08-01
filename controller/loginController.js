@@ -5,31 +5,33 @@ const jwt = require('jsonwebtoken')
 
 // register logic
 exports.register = async (req, res) => {
-    const { name, email, password, secretKey } = req.body
-    // console.log('incoming data',req.body)
-    // verify the secret key
-    let assignedRole;
-if (secretKey !== process.env.secretKey) {
-    return res.json({ message: 'Unauthorized Account Creation' });
-}
-    // check if the user exsists
-    const userExsist = await User.findOne({ email })
-    if (userExsist) {
-        return res.json({ message: 'Email Already Exsists' })
-    }
-    // hashing the password
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const user = new User({
+    try {
+      const { name, email, password, secretKey } = req.body;
+      // console.log('incoming data',req.body)
+      // verify the secret key
+
+      if (secretKey !== process.env.secretKey) {
+        return res.json({ message: "Unauthorized Account Creation" });
+      }
+      // check if the user exsists
+      const userExsist = await User.findOne({ email });
+      if (userExsist) {
+        return res.json({ message: "Email Already Exsists" });
+      }
+      // hashing the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = new User({
         name,
         email,
         password: hashedPassword,
-        role:'user',
-        isActive: true
-
-    })
-    const newUser = await user.save()
-    res.status(201).json({ message: "created successfully", newUser })//
-
+        role: "user",
+        isActive: true,
+      });
+      const newUser = await user.save();
+      res.status(201).json({ message: "created successfully", newUser }); //
+    } catch (error) {
+        res.status(500).json({message:error.message})
+    }
 }
 
 
