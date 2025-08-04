@@ -1,0 +1,48 @@
+// const jwt = require('jsonwebtoken');
+// const JWT_SECRET = process.env.JWT_SECRET;
+
+// // Authentication middleware
+// const auth = (req, res, next) => {
+//     // Extract authorization header
+//     const authHeader = req.headers.authorization;
+//     // Get the actual token from the header
+//     const token = authHeader && authHeader.split(' ')[1];
+
+//     // Check if we have a token
+//     if (!token) return res.status(400).json({ message: 'No token provided' });
+
+//     try {
+//         // Verify the token using the secret key 
+//         const decode = jwt.verify(token, JWT_SECRET);
+
+//         // Attach the payload to the request object
+//         // This is the logged-in user
+//         req.user = decode;
+//         // Proceed to the next route/function
+//         next();
+//     } catch (error) {
+//         return res.status(500).json({ message: error.message });
+//     }
+// };
+
+// // Middleware to authorize access based on user type
+// const authorizeUser OrOwner = (req, res, next) => {
+//     // Check if the user is logged in
+//     if (!req.user) {
+//         return res.status(403).json({ message: 'Access denied: user not logged in' });
+//     }
+
+//     // Check if the user is a regular user or an owner
+//     const isUser  = req.user.type === 'user'; // Assuming 'type' is a property that indicates user type
+//     const isOwner = req.user.isOwner; // Assuming isOwner is a boolean property
+
+//     // Allow access if the user is a regular user or an owner
+//     if (!isUser  && !isOwner) {
+//         return res.status(403).json({ message: 'Access denied: insufficient permission' });
+//     }
+
+//     next();
+// };
+
+// // Exports
+// module.exports = { auth, authorizeUser OrOwner };
