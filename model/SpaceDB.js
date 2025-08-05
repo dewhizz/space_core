@@ -7,7 +7,7 @@ const userSchema=new Schema({
     email:{type:String,required:true,unique:true},
     password:{type:String,required:true},
     phone:{type:Number},
-    role:{type:String, enum:['user','owner']},
+    role:{type:String, enum:['user','owner'],default:'user'},
     photo:String,
     isActive:Boolean
 },{timestamps:true})
