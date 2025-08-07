@@ -4,7 +4,7 @@ const { Inquiry, Property, User } = require("../model/SpaceDB");
 exports.addInquiry = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { property, message } = req.body;
+    const property=req.params.id
 
     const existProperty = await Property.findById(property);
     if (!existProperty) {
@@ -13,8 +13,7 @@ exports.addInquiry = async (req, res) => {
 
     const newInquiry = new Inquiry({
       user: userId,
-      property,
-      message,
+     propertyData,
       status: "pending",
     });
 

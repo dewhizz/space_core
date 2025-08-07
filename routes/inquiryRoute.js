@@ -6,7 +6,7 @@ const inquiryController = require("../controller/inquiryController")
 // authorization
 const { auth, authorizeRoles } = require("../middleware/auth");
 
-router.post("/",auth,inquiryController.addInquiry);
+router.post("/:id",auth,inquiryController.addInquiry);
 
 // user inquires
 router.get("/",inquiryController.getUserInquiries);
