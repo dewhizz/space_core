@@ -1,90 +1,117 @@
-const {Inquiry, Booking}=require('../model/SpaceDB')
+const { Inquiry, Booking } = require("../model/SpaceDB");
 
-// add booking
-exports.addBooking=async (req,res)=>{
-    try {
-      
-       const user=req.user.userId
-       const {property,startDate,endDate}=req.body
-       const inquiry=req.params.id
+// Add Booking (Only if inquiry is approved)
+exports.addBooking = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { property, startDate, endDate } = req.body;
+    const inquiryId = req.params.id;
 
-    //    check if the user has already inquired about the property
-    const previousInquiry=await Inquiry.findOne({inquiry})
-    if(!previousInquiry){
-        return res.status(403).json({message:'You must inquire first'})
-     }
-        // create the booking
-        const newBooking=new Booking({
-            property,
-            startDate,
-            endDate,
-            user
-          })
-         const savedBooking=await newBooking.save()
+    // 🔍 Find the inquiry by ID and validate ownership
+    const inquiry = await Inquiry.findById(inquiryId);
 
-         res.status(200).json({message:'your booking was successfully added',savedBooking})
-
-    } catch (error) {
-        res.status(500).json({message:error.message})
+    if (!inquiry) {
+      return res.status(404).json({ message: "Inquiry not found" });
     }
-}
 
-// fetch all booking requests
-exports.getAllBookings=async(req,res)=>{
-  try {
-      const booking=await Booking.find()
-    .populate('property')
-    .populate('user','name email phone')
-    res.status(200).json(booking)
+    if (inquiry.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized: This inquiry doesn't belong to you." });
+    }
+
+    if (inquiry.status !== "approved") {
+      return res.status(403).json({ message: "Your inquiry must be approved before booking." });
+    }
+
+    //  Create the booking
+    const newBooking = new Booking({
+      property,
+      startDate,
+      endDate,
+      user: userId,
+    });
+
+    const savedBooking = await newBooking.save();
+    res.status(201).json({ message: "Booking successfully created", booking: savedBooking });
   } catch (error) {
-    res.status(500).json({message:error.message})
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// fetch one
-exports.getById=async(req,res)=>{
-   try {
-    const booking=await Booking.findById(req.params.id)
-    .populate('user','name email phone')
-    if(!booking)return res.status(404).json({message:'Booking not found'})
-        res.status(200).json(booking)
-   } catch (error) {
-    res.status(500).json({message:error.message})
-   }
-}
-
-// update
-exports.updateBooking=async(req,res)=>{
+//  Get All Bookings
+exports.getAllBookings = async (req, res) => {
   try {
-    // find the booking
-    const updateBooking=await Booking.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {new:true}
-    )
-    if(!updateBooking) return res.status(404).json({message:"booking not found"})
-      res.status(201).json({message:'booking updated successfully',updateBooking})
-  } catch (error) {
-    res.status(500).json({message:error.message})
-  }
-}
+    const bookings = await Booking.find()
+      .populate("property", "title location")
+      .populate("user", "name email phone");
 
-// delete Booking
-exports.deleteBooking=async(req,res)=>{
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// 🔍 Get Booking by ID
+exports.getById = async (req, res) => {
   try {
-    // extract the userId from the booking
-    const userId=req.user.userId
-    const booking=req.params.id
+    const booking = await Booking.findById(req.params.id)
+      .populate("property", "title location")
+      .populate("user", "name email phone");
 
-     const existBooking = await Booking.findByIdAndDelete(booking);
-     
-     if (!existBooking) {
-       return res.status(404).json({ message: "Booking not found" });
-     }
-     // unassign booking to createdBy
-     await Inquiry.updateMany({ user: userId }, { $set: { user: null } });
-     res.status(200).json({ message: "Booking deleted successfully" });
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.status(200).json(booking);
   } catch (error) {
-    res.status(500).json({message:error.message})
+    res.status(500).json({ message: error.message });
   }
-}
+};
+
+//  Update Booking (Only by creator)
+exports.updateBooking = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to update this booking" });
+    }
+
+    const allowedUpdates = ["startDate", "endDate"];
+    allowedUpdates.forEach((field) => {
+      if (req.body[field]) booking[field] = req.body[field];
+    });
+
+    await booking.save();
+    res.status(200).json({ message: "Booking updated successfully", booking });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//  Delete Booking (Only by creator)
+exports.deleteBooking = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const bookingId = req.params.id;
+
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to delete this booking" });
+    }
+
+    await booking.deleteOne();
+    res.status(200).json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
