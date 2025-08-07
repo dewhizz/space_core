@@ -53,7 +53,7 @@ exports.respondToInquiry = async (req, res) => {
   }
 };
 
-// 📋 Get All Inquiries
+// Get All Inquiries
 exports.getAllInquiries = async (req, res) => {
   try {
     const inquiries = await Inquiry.find()
@@ -66,7 +66,7 @@ exports.getAllInquiries = async (req, res) => {
   }
 };
 
-// 🔍 Get One Inquiry
+//  Get One Inquiry
 exports.getOneById = async (req, res) => {
   try {
     const inquiry = await Inquiry.findById(req.params.id)
@@ -123,6 +123,37 @@ exports.deleteInquiry = async (req, res) => {
 
     await inquiry.deleteOne();
     res.status(200).json({ message: "Inquiry deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get inquiries made by the logged-in user
+exports.getUserInquiries = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const inquiries = await Inquiry.find({ user: userId })
+      .populate("property", "title")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(inquiries);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get inquiries for properties owned by the logged-in owner
+exports.getOwnerInquiries = async (req, res) => {
+  try {
+    const ownerId = req.user.userId;
+
+    const properties = await Property.find({ owner: ownerId }).select("_id");
+    const inquiries = await Inquiry.find({ property: { $in: properties } })
+      .populate("user", "name email")
+      .populate("property", "title")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(inquiries);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
