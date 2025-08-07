@@ -11,7 +11,7 @@ exports.addInquiry = async (req, res) => {
     console.log(req.body);
 
     // confirm existence of the property
-    const existProperty = await Property.findOne(property);
+    const existProperty = await Property.findById(property);
     if (!existProperty)
       return res.status(404).json({ message: "Property not found" });
 
