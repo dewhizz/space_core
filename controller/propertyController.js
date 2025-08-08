@@ -13,6 +13,7 @@ exports.addProperty=async(req,res)=>{
     try {
          const {plotNumber,title,description} =req.body
          owner =req.user.userId
+         console.log(req.body)
          
        // prepare the upload file
        let photo=null
@@ -33,7 +34,7 @@ exports.addProperty=async(req,res)=>{
             owner
         })
         
-         const newProperty=req.body
+         
         await savedProperty.save()
         res.status(201).json({message:'property added successfully',savedProperty})
     } catch (error) {

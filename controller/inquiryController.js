@@ -3,7 +3,7 @@ const { Inquiry, Property, User } = require("../model/SpaceDB");
 // Add Inquiry
 exports.addInquiry = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     // const property=req.params.id
     const {property,message}=req.body
 
