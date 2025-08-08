@@ -7,8 +7,11 @@ const bookingController = require("../controller/bookingController")
 const { auth, authorizeRoles } = require("../middleware/auth");
 
 router.post("/",auth,bookingController.addBooking);
-router.get("/",auth,bookingController.getAllBookings);
-router.get("/:id",auth,bookingController.getById);
+
+// user
+router.get("/myBookings",auth,bookingController.getMyBookings);
+
+
 router.put("/:id",auth,bookingController.updateBooking);
 router.delete("/:id",auth,bookingController.deleteBooking);
 module.exports = router;

@@ -12,10 +12,8 @@ router.post("/",auth,inquiryController.addInquiry);
 router.get("/myinquires",auth,inquiryController.getUserInquiries);
 
 // // owner inquires
-// router.get("/",inquiryController.getOwnerInquiries);
+router.get("/",inquiryController.getOwnerInquiries);
 
-// router.get("/",inquiryController.getAllInquiries);
-// router.get("/:id",auth,inquiryController.getOneById);
 router.put("/:id",auth,inquiryController.updateInquiry);
 router.delete("/:id", auth, inquiryController.deleteInquiry);
 
