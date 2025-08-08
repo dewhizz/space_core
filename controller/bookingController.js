@@ -41,7 +41,7 @@ exports.addBooking = async (req, res) => {
 exports.getMyBookings = async (req, res) => {
   try {
     const userId=req.user.userId
-    const bookings = await Booking.findOne({user:userId})
+    const bookings = await Booking.find(userId)
       .populate("property", "title location")
       .populate("user", "name email phone");
 
