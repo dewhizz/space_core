@@ -5,7 +5,7 @@ exports.addInquiry = async (req, res) => {
   try {
     const userId = req.user.userId;
     // const property=req.params.id
-    const {property,message}=req.body
+    const { property, message } = req.body;
 
     const existProperty = await Property.findById(property);
     if (!existProperty) {
@@ -14,13 +14,15 @@ exports.addInquiry = async (req, res) => {
 
     const newInquiry = new Inquiry({
       user: userId,
-     property,
-     message,
+      property,
+      message,
       status: "pending",
     });
 
     await newInquiry.save();
-    res.status(201).json({ message: "Inquiry created successfully", inquiry: newInquiry });
+    res
+      .status(201)
+      .json({ message: "Inquiry created successfully", inquiry: newInquiry });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -33,15 +35,16 @@ exports.respondToInquiry = async (req, res) => {
     const inquiryId = req.params.id;
     const { response, status } = req.body;
 
-    const inquiry = await Inquiry.findById(inquiryId)
-    .populate("property");
+    const inquiry = await Inquiry.findById(inquiryId).populate("property");
 
     if (!inquiry) {
       return res.status(404).json({ message: "Inquiry not found" });
     }
 
     if (inquiry.property.owner.toString() !== ownerId) {
-      return res.status(403).json({ message: "Unauthorized to respond to this inquiry" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to respond to this inquiry" });
     }
 
     inquiry.response = response;
@@ -94,7 +97,9 @@ exports.updateInquiry = async (req, res) => {
     }
 
     if (inquiry.user.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Unauthorized to update this inquiry" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to update this inquiry" });
     }
 
     const allowedUpdates = ["message"];
@@ -119,7 +124,9 @@ exports.deleteInquiry = async (req, res) => {
     }
 
     if (inquiry.user.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Unauthorized to delete this inquiry" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this inquiry" });
     }
 
     await inquiry.deleteOne();
@@ -132,7 +139,7 @@ exports.deleteInquiry = async (req, res) => {
 // Get inquiries made by the logged-in user
 exports.getUserInquiries = async (req, res) => {
   try {
-     const userId = req.user.id;
+    const userId = req.user.userId;
     const inquiries = await Inquiry.find({ user: userId })
       .populate("property", "title")
       .sort({ createdAt: -1 });

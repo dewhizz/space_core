@@ -8,11 +8,11 @@ const { auth, authorizeRoles } = require("../middleware/auth");
 
 router.post("/",auth,inquiryController.addInquiry);
 
-// user inquires
-router.get("/",inquiryController.getUserInquiries);
+// // user inquires
+// router.get("/",inquiryController.getUserInquiries);
 
-// owner inquires
-router.get("/",inquiryController.getOwnerInquiries);
+// // owner inquires
+// router.get("/",inquiryController.getOwnerInquiries);
 
 router.get("/",inquiryController.getAllInquiries);
 router.get("/:id",auth,inquiryController.getOneById);
