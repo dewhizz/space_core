@@ -3,7 +3,7 @@ const { Inquiry, Property, User } = require("../model/SpaceDB");
 // Add Inquiry
 exports.addInquiry = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     // const property=req.params.id
     const {property,message}=req.body
 
@@ -132,7 +132,7 @@ exports.deleteInquiry = async (req, res) => {
 // Get inquiries made by the logged-in user
 exports.getUserInquiries = async (req, res) => {
   try {
-    const userId = req.user.userId;
+     const userId = req.user.id;
     const inquiries = await Inquiry.find({ user: userId })
       .populate("property", "title")
       .sort({ createdAt: -1 });
