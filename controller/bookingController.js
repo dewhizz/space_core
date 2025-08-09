@@ -4,10 +4,9 @@ const { Inquiry, Booking } = require("../model/SpaceDB");
 exports.addBooking = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { property, startDate, endDate } = req.body;
+    const { startDate, endDate } = req.body;
     const inquiryId = req.params.id;
 
-    // 🔍 Find the inquiry by ID and validate ownership
     const inquiry = await Inquiry.findById(inquiryId);
 
     if (!inquiry) {
@@ -22,9 +21,8 @@ exports.addBooking = async (req, res) => {
       return res.status(403).json({ message: "Your inquiry must be approved before booking." });
     }
 
-    //  Create the booking
     const newBooking = new Booking({
-      property,
+      property: inquiry.property,  
       startDate,
       endDate,
       user: userId,
