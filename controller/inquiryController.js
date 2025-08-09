@@ -8,6 +8,7 @@ exports.addInquiry = async (req, res) => {
     const { property, message } = req.body;
 
     const existProperty = await Property.findById(property);
+    console.log(existProperty)
     if (!existProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
@@ -57,35 +58,6 @@ exports.respondToInquiry = async (req, res) => {
   }
 };
 
-// Get All Inquiries
-exports.getAllInquiries = async (req, res) => {
-  try {
-    const inquiries = await Inquiry.find()
-      .populate("property", "title owner")
-      .populate("user", "name email phone");
-
-    res.status(200).json(inquiries);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-//  Get One Inquiry
-exports.getOneById = async (req, res) => {
-  try {
-    const inquiry = await Inquiry.findById(req.params.id)
-      .populate("property", "title owner")
-      .populate("user", "name email phone");
-
-    if (!inquiry) {
-      return res.status(404).json({ message: "Inquiry not found" });
-    }
-
-    res.status(200).json(inquiry);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 //  Update Inquiry (User Only)
 exports.updateInquiry = async (req, res) => {
@@ -139,8 +111,8 @@ exports.deleteInquiry = async (req, res) => {
 // Get inquiries made by the logged-in user
 exports.getUserInquiries = async (req, res) => {
   try {
-    const userId = req.user.userId;
-    const inquiries = await Inquiry.find({ user: userId })
+    const user = req.user.userId;
+    const inquiries = await Inquiry.find( {user} )
       .populate("property", "title")
       .sort({ createdAt: -1 });
 
@@ -153,9 +125,9 @@ exports.getUserInquiries = async (req, res) => {
 // Get inquiries for properties owned by the logged-in owner
 exports.getOwnerInquiries = async (req, res) => {
   try {
-    const ownerId = req.user.userId;
-
-    const properties = await Property.find({ owner: ownerId }).select("_id");
+    const owner= req.user.userId;
+console.log(req.user.userId)
+    const properties = await Property.find({ owner }).select("_id");
     const inquiries = await Inquiry.find({ property: { $in: properties } })
       .populate("user", "name email")
       .populate("property", "title")

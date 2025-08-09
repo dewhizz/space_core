@@ -12,7 +12,7 @@ router.post("/",auth,inquiryController.addInquiry);
 router.get("/myinquires",auth,inquiryController.getUserInquiries);
 
 // // owner inquires
-router.get("/",inquiryController.getOwnerInquiries);
+router.get("/",auth,inquiryController.getOwnerInquiries);
 
 router.put("/:id",auth,inquiryController.updateInquiry);
 router.delete("/:id", auth, inquiryController.deleteInquiry);
