@@ -15,7 +15,7 @@ const auth = (req, res, next) => {
 
         // we attach the payload to the request object
         // this is the logged in user
-        req.user = { userId: decode.id };
+        req.user = decode
         // proceed to the next route/function
         next()
 
