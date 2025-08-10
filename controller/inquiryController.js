@@ -8,7 +8,7 @@ exports.addInquiry = async (req, res) => {
     const { property, message } = req.body;
 
     const existProperty = await Property.findById(property);
-    console.log(existProperty)
+    console.log("existing property",existProperty)
     if (!existProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
@@ -115,7 +115,7 @@ exports.getUserInquiries = async (req, res) => {
     const inquiries = await Inquiry.find( {user} )
       .populate("property", "title")
       .sort({ createdAt: -1 });
-
+console.log("user-inquires",inquiries)
     res.status(200).json(inquiries);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -126,7 +126,7 @@ exports.getUserInquiries = async (req, res) => {
 exports.getOwnerInquiries = async (req, res) => {
   try {
     const owner= req.user.userId;
-console.log(req.user.userId)
+console.log("this is the ownerid",req.user.userId)
     const properties = await Property.find({ owner }).select("_id");
     const inquiries = await Inquiry.find({ property: { $in: properties } })
       .populate("user", "name email")
