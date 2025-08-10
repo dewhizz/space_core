@@ -8,7 +8,7 @@ const { auth, authorizeRoles } = require("../middleware/auth");
 
 router.post("/",auth,bookingController.addBooking)
 // user
-router.get("/my-Bookings",auth,bookingController.getMyBookings);
+router.get("/my-bookings",auth,bookingController.getMyBookings);
 
 
 router.put("/:id",auth,bookingController.updateBooking);
