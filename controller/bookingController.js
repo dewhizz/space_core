@@ -40,8 +40,14 @@ exports.getMyBookings = async (req, res) => {
   try {
     const user=req.user.userId
     const bookings = await Booking.find({user})
+      .populate({
+    path: "inquiry",
+    populate: {
+      path: "property",
+      select: "title location", 
+    },
+  })
 
-      .populate("property", "title location")
       .populate("user", "name email phone");
 
     res.status(200).json(bookings);
