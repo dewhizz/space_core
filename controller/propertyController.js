@@ -168,22 +168,5 @@ exports.updatePropertyOwnership = async (req, res) => {
   }
 };
 
-exports.getOwnersProperties = async (req, res) => {
-  try { console.log("Owner ID:", owner);
-    const owner = req.user?.userId;
-   
 
-    if (!owner) {
-      return res.status(400).json({ message: "Owner ID required" });
-    }
-
-    // If you're expecting multiple properties, use find(), not findOne()
-    const properties = await Property.find({ owner });
-    res.json(properties);
-    console.log(properties)
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 
