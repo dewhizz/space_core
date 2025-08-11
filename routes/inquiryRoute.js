@@ -9,16 +9,17 @@ const { auth, authorizeRoles } = require("../middleware/auth");
 router.post("/",auth,inquiryController.addInquiry);
 
 // // user inquires
-router.get("/my-inquires",auth,inquiryController.getUserInquiries);
+router.get("/my-inquires",auth,authorizeRoles('user'),inquiryController.getUserInquiries);
 
 // // owner inquires
-// router.get("/owner-inquires",auth,inquiryController.getOwnerInquiries);
+router.get("/owner-inquires",auth,authorizeRoles('owner'),inquiryController.getOwnerInquiries);
+
+
 
 router.put("/:id",auth,inquiryController.updateInquiry);
 router.delete("/:id", auth, inquiryController.deleteInquiry);
 
 //response by the owner
 router.put("/response/:id", auth, inquiryController.respondToInquiry);
-
 
 module.exports = router;
