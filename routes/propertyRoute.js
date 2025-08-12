@@ -8,7 +8,7 @@ const { auth, authorizeRoles } = require("../middleware/auth");
 
 router.post("/",auth,propertyController.uploadPropertyPhoto,propertyController.addProperty);
 
-// router.get("/owner-properties",auth, propertyController.getOwnersProperties);
+router.get("/owner-properties",auth, propertyController.getOwnersProperties);
 router.get("/", propertyController.getAllProperties);
 
 router.put("/:id",auth,propertyController.updateProperty);

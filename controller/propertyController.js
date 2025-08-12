@@ -12,6 +12,7 @@ exports.uploadPropertyPhoto = upload.single("photo");
 
 exports.addProperty = async (req, res) => {
   try {
+    console.log(req.body)
     const { plotNumber, title, description } = req.body;
     const owner = req.user.userId; 
 
