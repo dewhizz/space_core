@@ -182,4 +182,24 @@ exports.updatePropertyOwnership = async (req, res) => {
 };
 
 
+// Get properties owned by the logged-in user
+exports.getOwnerProperties = async (req, res) => {
+  try {
+    const ownerId = req.user.userId;
+    if (!ownerId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const properties = await Property.find({ owner: ownerId }).populate(
+      "owner",
+      "name email phone"
+    );
+
+    res.status(200).json(properties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
