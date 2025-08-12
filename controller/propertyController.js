@@ -36,14 +36,14 @@ exports.addProperty = async (req, res) => {
 
     await savedProperty.save();
 
-    // ✅ Update user's role to "owner" if needed
+    //  Update user's role to "owner" if needed
     const user = await User.findById(owner);
     if (user && user.role !== "owner") {
       user.role = "owner";
       await user.save();
     }
 
-    // ✅ Send updated user and property in response
+    // Send updated user and property in response
     res.status(201).json({
       message: "Property added successfully",
       savedProperty,
