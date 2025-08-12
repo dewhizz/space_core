@@ -57,27 +57,25 @@ exports.getMyBookings = async (req, res) => {
 };
 
 //  Get Bookings Made to My Properties
-exports.getBookingsForMyProperties=async (req,res)=>{
+exports.getBookingsForMyProperties = async (req, res) => {
   try {
-    const ownerId=req.user.userId
-    const bookings=await Booking.find()
-    .populate({
-      path:"property",
-      match:{owner:ownerId},
-      select:'title location owner'
-    })
-    .populate('user',"name email phone")
+    const ownerId = req.user.userId;
 
-    // Filter out bookings where property didn't match (i.e. not owned by this user)
-    const ownedBookings = bookings.filter(b => b.property);
+    // Step 1: Get all property IDs owned by this user
+    const myProperties = await Property.find({ owner: ownerId }).select("_id");
+    const propertyIds = myProperties.map((p) => p._id);
 
-     res.status(200).json(ownedBookings);
+    // Step 2: Get bookings for those property IDs
+    const bookings = await Booking.find({ property: { $in: propertyIds } })
+      .populate("property", "title location owner")
+      .populate("user", "name email phone");
 
+    res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
-
   }
-}
+};
+
 //  Update Booking (Only by creator)
 exports.updateBooking = async (req, res) => {
   try {
