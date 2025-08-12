@@ -29,9 +29,9 @@ const propertySchema = new Schema(
     propertyType: {
       type: String,
       enum: ["apartment", "bungalow", "mansion", "office", "shop"],
-      required: true,
+      
     },
-    location: { type: String, required: true },
+    location: { type: String },
     rentAmount: { type: String },
     depositAmount: { type: String },
     photo: { type: String },
