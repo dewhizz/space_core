@@ -1,4 +1,4 @@
-const { Inquiry, Booking } = require("../model/SpaceDB");
+const { Inquiry, Booking, Property } = require("../model/SpaceDB");
 
 // Add Booking (Only if inquiry is approved)
 exports.addBooking = async (req, res) => {
@@ -56,22 +56,27 @@ exports.getMyBookings = async (req, res) => {
   }
 };
 
-//  Get Bookings Made to My Properties
+// Get Bookings Made to My Properties
 exports.getBookingsForMyProperties = async (req, res) => {
   try {
     const ownerId = req.user.userId;
 
-    // Step 1: Get all property IDs owned by this user
+    // Step 1: Find all properties owned by the current user
     const myProperties = await Property.find({ owner: ownerId }).select("_id");
-    const propertyIds = myProperties.map((p) => p._id);
 
-    // Step 2: Get bookings for those property IDs
+    // Step 2: Extract property IDs
+    const propertyIds = myProperties.map((property) => property._id);
+
+    // Step 3: Find all bookings where property is in the list of owned property IDs
     const bookings = await Booking.find({ property: { $in: propertyIds } })
       .populate("property", "title location owner")
       .populate("user", "name email phone");
 
+    // Step 4: Respond with the bookings
     res.status(200).json(bookings);
+
   } catch (error) {
+    console.error("Error in getBookingsForMyProperties:", error);
     res.status(500).json({ message: error.message });
   }
 };
