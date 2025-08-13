@@ -36,20 +36,29 @@ const propertySchema = new Schema(
   },
   { timestamps: true }
 );
+const mongoose = require("mongoose");
 
-// inquiries
-const inquirySchema = new Schema({
-  property: { type: mongoose.Schema.Types.ObjectId, ref: 'Property' },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  message: { type: String },
+
+const MessageSchema = new Schema({
+  sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  text: String,
+  timestamp: { type: Date, default: Date.now },
+});
+
+const InquirySchema = new Schema({
+  property: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
+  initialMessage: String, // first inquiry message
+  response: String,       // owner's reply
   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],
-    default: "approved",
+    default: "pending",
   },
+  messages: [MessageSchema], // real-time chat history
+}, { timestamps: true });
 
-  response: String
-}, { timestamps: true })
 
 // bookings
 const bookingSchema = new Schema({

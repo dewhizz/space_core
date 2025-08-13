@@ -1,14 +1,18 @@
 const { Inquiry, Property, User } = require("../model/SpaceDB");
 
+// Inject Socket.IO instance (optional pattern)
+let io;
+exports.injectSocket = (socketInstance) => {
+  io = socketInstance;
+};
+
 // Add Inquiry
 exports.addInquiry = async (req, res) => {
   try {
     const userId = req.user.userId;
-    // const property=req.params.id
     const { property, message } = req.body;
 
     const existProperty = await Property.findById(property);
-    console.log("existing property",existProperty)
     if (!existProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
@@ -21,15 +25,19 @@ exports.addInquiry = async (req, res) => {
     });
 
     await newInquiry.save();
-    res
-      .status(201)
-      .json({ message: "Inquiry created successfully", inquiry: newInquiry });
+
+    // Notify owner in real-time
+    if (io) {
+      io.to(existProperty.owner.toString()).emit("inquiryReceived", newInquiry);
+    }
+
+    res.status(201).json({ message: "Inquiry created successfully", inquiry: newInquiry });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-//  Respond to Inquiry (Owner Only)
+// Respond to Inquiry (Owner Only)
 exports.respondToInquiry = async (req, res) => {
   try {
     const ownerId = req.user.userId;
@@ -43,14 +51,17 @@ exports.respondToInquiry = async (req, res) => {
     }
 
     if (inquiry.property.owner.toString() !== ownerId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to respond to this inquiry" });
+      return res.status(403).json({ message: "Unauthorized to respond to this inquiry" });
     }
 
     inquiry.response = response;
-    inquiry.status = status || inquiry.status; // preserve current status if not provided
+    inquiry.status = status || inquiry.status;
     await inquiry.save();
+
+    // Notify user in real-time
+    if (io) {
+      io.to(inquiry.user.toString()).emit("inquiryStatusChanged", inquiry);
+    }
 
     res.status(200).json({ message: "Response sent successfully", inquiry });
   } catch (error) {
@@ -58,8 +69,7 @@ exports.respondToInquiry = async (req, res) => {
   }
 };
 
-
-//  Update Inquiry (User Only)
+// Update Inquiry (User Only)
 exports.updateInquiry = async (req, res) => {
   try {
     const inquiry = await Inquiry.findById(req.params.id);
@@ -69,9 +79,7 @@ exports.updateInquiry = async (req, res) => {
     }
 
     if (inquiry.user.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to update this inquiry" });
+      return res.status(403).json({ message: "Unauthorized to update this inquiry" });
     }
 
     const allowedUpdates = ["message"];
@@ -86,7 +94,7 @@ exports.updateInquiry = async (req, res) => {
   }
 };
 
-//  Delete Inquiry (User Only)
+// Delete Inquiry (User Only)
 exports.deleteInquiry = async (req, res) => {
   try {
     const inquiry = await Inquiry.findById(req.params.id);
@@ -96,9 +104,7 @@ exports.deleteInquiry = async (req, res) => {
     }
 
     if (inquiry.user.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to delete this inquiry" });
+      return res.status(403).json({ message: "Unauthorized to delete this inquiry" });
     }
 
     await inquiry.deleteOne();
@@ -108,14 +114,19 @@ exports.deleteInquiry = async (req, res) => {
   }
 };
 
-// Get inquiries made by the logged-in user
+// Get inquiries made by the logged-in user (with optional status filter)
 exports.getUserInquiries = async (req, res) => {
   try {
     const user = req.user.userId;
-    const inquiries = await Inquiry.find( {user} )
+    const { status } = req.query;
+
+    const filter = { user };
+    if (status) filter.status = status;
+
+    const inquiries = await Inquiry.find(filter)
       .populate("property", "title")
       .sort({ createdAt: -1 });
-console.log("user-inquires",inquiries)
+
     res.status(200).json(inquiries);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -125,15 +136,49 @@ console.log("user-inquires",inquiries)
 // Get inquiries for properties owned by the logged-in owner
 exports.getOwnerInquiries = async (req, res) => {
   try {
-    const owner= req.user.userId;
-console.log("this is the ownerid",req.user.userId)
+    const owner = req.user.userId;
+    const { status } = req.query;
+
     const properties = await Property.find({ owner }).select("_id");
-    const inquiries = await Inquiry.find({ property: { $in: properties } })
+    const filter = { property: { $in: properties } };
+    if (status) filter.status = status;
+
+    const inquiries = await Inquiry.find(filter)
       .populate("user", "name email")
       .populate("property", "title")
       .sort({ createdAt: -1 });
 
     res.status(200).json(inquiries);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add a message to an inquiry (chat thread)
+exports.addMessageToInquiry = async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findById(req.params.id).populate("property");
+
+    if (!inquiry || inquiry.status !== "approved") {
+      return res.status(403).json({ message: "Chat not allowed" });
+    }
+
+    const message = {
+      sender: req.user.userId,
+      text: req.body.text,
+      timestamp: new Date(),
+    };
+
+    inquiry.messages.push(message);
+    await inquiry.save();
+
+    // Emit to both user and owner
+    if (io) {
+      io.to(inquiry.user.toString()).emit("receiveMessage", message);
+      io.to(inquiry.property.owner.toString()).emit("receiveMessage", message);
+    }
+
+    res.status(200).json({ message: "Message sent", data: message });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

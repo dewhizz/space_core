@@ -36,6 +36,10 @@ app.use('/api/owner',owner)
 const userDash=require('./routes/userDashRoute')
 app.use('/api/userDash',userDash)
 
+// socket
+const socketController = require("./controllers/socketController");
+socketController(io)
+
 // connection to the db
 mongoose.connect(process.env.MONGO_URI)
 .then(()=>console.log("MongoDB Connected"))

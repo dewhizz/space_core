@@ -9,8 +9,9 @@ const { auth, authorizeRoles } = require("../middleware/auth");
 router.post("/:id",auth,bookingController.addBooking)
 // user
 router.get("/my-bookings",auth,bookingController.getMyBookings);
-
+router.put("/owner/:id",auth,authorizeRoles('owner'),bookingController.respondToBooking);
 
 router.put("/:id",auth,bookingController.updateBooking);
+
 router.delete("/:id",auth,bookingController.deleteBooking);
 module.exports = router;
