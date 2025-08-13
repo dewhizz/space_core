@@ -2,37 +2,46 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 // define the user schema
-const userSchema = new Schema({
-  name: { type: String },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phone: { type: Number },
-  role: { type: String, enum: ['user', 'owner'], default: 'user' },
-  photo: String,
-  isActive: Boolean
-}, { timestamps: true })
 
+const userSchema = new Schema(
+  {
+    name: { type: String },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    phone: { type: Number },
+    role: { type: String, enum: ["user", "owner"], default: "user" },
+    photo: { type: String },
+    isActive: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
 // properties
 const propertySchema = new Schema(
   {
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     plotNumber: { type: String, required: true, unique: true },
-    title: { type: String },
+    title: { type: String, required: true },
     description: { type: String },
     propertyType: {
       type: String,
       enum: ["apartment", "bungalow", "mansion", "office", "shop"],
+      
     },
     location: { type: String },
-    rentAmount: String,
-    depositAmount: String,
-    photo: String,
-    isAvailable: Boolean,
+    rentAmount: { type: String },
+    depositAmount: { type: String },
+    photo: { type: String },
+    isAvailable: { type: Boolean, default: true },
     status: {
       type: String,
       enum: ["rented", "active", "inactive"],
+      default: "active",
     },
-    viewsCount: Number,
+    viewsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

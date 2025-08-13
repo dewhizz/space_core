@@ -7,9 +7,14 @@ const bookingController = require("../controller/bookingController")
 const { auth, authorizeRoles } = require("../middleware/auth");
 
 router.post("/:id",auth,bookingController.addBooking)
+
 // user
 router.get("/my-bookings",auth,bookingController.getMyBookings);
+
 router.put("/owner/:id",auth,authorizeRoles('owner'),bookingController.respondToBooking);
+
+// owner
+router.get("/owner-bookings", auth,authorizeRoles('owner'), bookingController.getBookingsForMyProperties);
 
 router.put("/:id",auth,bookingController.updateBooking);
 

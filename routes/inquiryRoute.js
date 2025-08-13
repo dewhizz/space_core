@@ -14,9 +14,10 @@ router.get("/my-inquires",auth,authorizeRoles('user'),inquiryController.getUserI
 // owner inquires
 router.get("/owner-inquires",auth,authorizeRoles('owner'),inquiryController.getOwnerInquiries);
 
-// update user inquiry
-router.put("/:id",authorizeRoles('user'),auth,inquiryController.updateInquiry);
-router.delete("/:id", auth,authorizeRoles('user'), inquiryController.deleteInquiry);
+
+
+router.put("/:id",auth,inquiryController.updateInquiry);
+router.delete("/:id", auth, inquiryController.deleteInquiry);
 
 //response by the owner
 router.put("/response/:id", auth, inquiryController.respondToInquiry);

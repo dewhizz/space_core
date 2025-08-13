@@ -5,27 +5,28 @@ const fs = require("fs");
 const path = require("path");
 
 // file location folder/directory
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "uploads/" })
 
-// add properties
+// Middleware for handling photo upload
 exports.uploadPropertyPhoto = upload.single("photo");
+
 exports.addProperty = async (req, res) => {
   try {
+    console.log(req.body)
     const { plotNumber, title, description } = req.body;
-    owner = req.user.userId;
-    console.log(req.body);
+    const owner = req.user.userId; 
 
-    // prepare the upload file
+    // Handle uploaded photo
     let photo = null;
     if (req.file) {
       const ext = path.extname(req.file.originalname);
       const newFileName = Date.now() + ext;
       const newPath = path.join("uploads", newFileName);
       fs.renameSync(req.file.path, newPath);
-      photo = newPath.replace(/\\/g, "/");
+      photo = newPath.replace(/\\/g, "/"); // for Windows path compatibility
     }
 
-    // create a new property
+    // Create and save new property
     const savedProperty = new Property({
       plotNumber,
       title,
@@ -35,10 +36,22 @@ exports.addProperty = async (req, res) => {
     });
 
     await savedProperty.save();
-    res
-      .status(201)
-      .json({ message: "property added successfully", savedProperty });
+
+    //  Update user's role to "owner" if needed
+    const user = await User.findById(owner);
+    if (user && user.role !== "owner") {
+      user.role = "owner";
+      await user.save();
+    }
+
+    // Send updated user and property in response
+    res.status(201).json({
+      message: "Property added successfully",
+      savedProperty,
+      updatedUser: user,
+    });
   } catch (error) {
+    console.error("Error adding property:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -163,6 +176,26 @@ exports.updatePropertyOwnership = async (req, res) => {
     res
       .status(200)
       .json({ message: "Ownership transfer successfull", property });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+// Get properties owned by the logged-in user
+exports.getOwnerProperties = async (req, res) => {
+  try {
+    const ownerId = req.user.userId;
+    if (!ownerId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const properties = await Property.find({ owner: ownerId }).populate(
+      "owner",
+      "name email phone"
+    );
+
+    res.status(200).json(properties);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
