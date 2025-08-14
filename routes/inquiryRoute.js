@@ -16,7 +16,7 @@ router.get("/owner-inquires",auth,authorizeRoles('owner'),inquiryController.getO
 
 
 
-router.put("/:id",auth,inquiryController.updateInquiry);
+router.put("/:id",auth,authorizeRoles('user','owner'),inquiryController.updateInquiry);
 router.delete("/:id", auth, inquiryController.deleteInquiry);
 
 //response by the owner
