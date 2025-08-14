@@ -45,7 +45,7 @@ const propertySchema = new Schema(
   },
   { timestamps: true }
 );
-const mongoose = require("mongoose");
+
 
 
 const MessageSchema = new Schema({
