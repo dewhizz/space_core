@@ -1,5 +1,6 @@
 const { Inquiry, Property, User } = require("../model/SpaceDB");
 
+// Inject Socket.IO instance (optional pattern)
 let io;
 exports.injectSocket = (socketInstance) => {
   io = socketInstance;
@@ -16,23 +17,11 @@ exports.addInquiry = async (req, res) => {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    // Prevent duplicate pending inquiries
-    const existing = await Inquiry.findOne({ user: userId, property, status: "pending" });
-    if (existing) {
-      return res.status(409).json({ message: "You already have a pending inquiry for this property." });
-    }
-
     const newInquiry = new Inquiry({
       user: userId,
       property,
-      owner: existProperty.owner,
-      initialMessage: message,
+      message,
       status: "pending",
-      messages: [{
-        sender: userId,
-        text: message,
-        timestamp: new Date()
-      }]
     });
 
     await newInquiry.save();
@@ -93,7 +82,7 @@ exports.updateInquiry = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized to update this inquiry" });
     }
 
-    const allowedUpdates = ["initialMessage"];
+    const allowedUpdates = ["message"];
     allowedUpdates.forEach((field) => {
       if (req.body[field]) inquiry[field] = req.body[field];
     });
@@ -125,7 +114,7 @@ exports.deleteInquiry = async (req, res) => {
   }
 };
 
-// Get inquiries made by the logged-in user
+// Get inquiries made by the logged-in user (with optional status filter)
 exports.getUserInquiries = async (req, res) => {
   try {
     const user = req.user.userId;
@@ -174,16 +163,8 @@ exports.addMessageToInquiry = async (req, res) => {
       return res.status(403).json({ message: "Chat not allowed" });
     }
 
-    const senderId = req.user.userId;
-    const isUser = inquiry.user.toString() === senderId;
-    const isOwner = inquiry.property.owner.toString() === senderId;
-
-    if (!isUser && !isOwner) {
-      return res.status(403).json({ message: "Unauthorized to send message" });
-    }
-
     const message = {
-      sender: senderId,
+      sender: req.user.userId,
       text: req.body.text,
       timestamp: new Date(),
     };

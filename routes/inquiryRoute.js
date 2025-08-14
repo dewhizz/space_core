@@ -1,26 +1,27 @@
 const express = require("express");
 const router = express.Router();
-const inquiryController = require("../controller/inquiryController")
+const inquiryController = require("../controllers/inquiryController");
 
-
-// authorization
+// Auth middleware
 const { auth, authorizeRoles } = require("../middleware/auth");
 
-// Create inquiry
-router.post("/", auth, authorizeRoles('user'), inquiryController.addInquiry);
+// Create inquiry (User only)
+router.post("/", auth, authorizeRoles("user"), inquiryController.addInquiry);
 
 // Get inquiries
-router.get("/my-inquiries", auth, authorizeRoles('user'), inquiryController.getUserInquiries);
-router.get("/owner-inquiries", auth, authorizeRoles('owner'), inquiryController.getOwnerInquiries);
+router.get("/my-inquiries", auth, authorizeRoles("user"), inquiryController.getUserInquiries);
+router.get("/owner-inquiries", auth, authorizeRoles("owner"), inquiryController.getOwnerInquiries);
 
-// Update & delete inquiries
-router.put("/:id", auth, authorizeRoles('user', 'owner'), inquiryController.updateInquiry);
-router.delete("/:id", auth, inquiryController.deleteInquiry);
+// Update inquiry (User can update message, Owner can update status)
+router.put("/:id", auth, authorizeRoles("user", "owner"), inquiryController.updateInquiry);
 
-// Owner response
-router.put("/response/:id", auth, inquiryController.respondToInquiry);
+// Delete inquiry (User only)
+router.delete("/:id", auth, authorizeRoles("user"), inquiryController.deleteInquiry);
 
-// Messaging
-router.post("/:id/messages", auth, inquiryController.addMessageToInquiry);
+// Respond to inquiry (Owner only, after approval)
+router.put("/respond/:id", auth, authorizeRoles("owner"), inquiryController.respondToInquiry);
 
-module.exports = router; 
+// Add message to inquiry (User or Owner)
+router.post("/:id/messages", auth, authorizeRoles("user", "owner"), inquiryController.addMessageToInquiry);
+
+module.exports = router;
