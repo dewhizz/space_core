@@ -6,25 +6,21 @@ const inquiryController = require("../controller/inquiryController")
 // authorization
 const { auth, authorizeRoles } = require("../middleware/auth");
 
-router.post("/",auth,authorizeRoles('user'),inquiryController.addInquiry);
+// Create inquiry
+router.post("/", auth, authorizeRoles('user'), inquiryController.addInquiry);
 
-// user inquires
-router.get("/my-inquires",auth,authorizeRoles('user'),inquiryController.getUserInquiries);
+// Get inquiries
+router.get("/my-inquiries", auth, authorizeRoles('user'), inquiryController.getUserInquiries);
+router.get("/owner-inquiries", auth, authorizeRoles('owner'), inquiryController.getOwnerInquiries);
 
-// owner inquires
-router.get("/owner-inquires",auth,authorizeRoles('owner'),inquiryController.getOwnerInquiries);
-
-
-
-router.put("/:id",auth,authorizeRoles('user','owner'),inquiryController.updateInquiry);
+// Update & delete inquiries
+router.put("/:id", auth, authorizeRoles('user', 'owner'), inquiryController.updateInquiry);
 router.delete("/:id", auth, inquiryController.deleteInquiry);
 
-//response by the owner
+// Owner response
 router.put("/response/:id", auth, inquiryController.respondToInquiry);
 
-//  a message to an inquiry thread (user or owner)
+// Messaging
 router.post("/:id/messages", auth, inquiryController.addMessageToInquiry);
-
-
 
 module.exports = router; 

@@ -1,53 +1,61 @@
-// entry file
-const express=require('express')
-const mongoose= require('mongoose')
-const cors = require('cors')
-require('dotenv').config()
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
+require('dotenv').config();
 
 // middleware
-const app = express()
-app.use(express.json())
-app.use(cors())
+const app = express();
+app.use(express.json());
+app.use(cors());
 
 // static file accessibility
-app.use('/uploads',express.static('uploads'))
+app.use('/uploads', express.static('uploads'));
 
-//  login/register routes
-const userAuth=require('./routes/loginRoutes')
-app.use('/user/Auth',userAuth)
+// login/register routes
+const userAuth = require('./routes/loginRoutes');
+app.use('/user/Auth', userAuth);
 
 // properties routes
-const properties=require('./routes/propertyRoute')
-app.use('/api/properties',properties)
+const properties = require('./routes/propertyRoute');
+app.use('/api/properties', properties);
 
 // inquiry routes
-const inquiries=require('./routes/inquiryRoute')
-app.use('/api/inquiries',inquiries)
+const inquiries = require('./routes/inquiryRoute');
+app.use('/api/inquiries', inquiries);
 
-// inquiry routes
-const booking=require('./routes/bookingRoute')
-app.use('/api/booking',booking)
+// booking routes
+const booking = require('./routes/bookingRoute');
+app.use('/api/booking', booking);
 
 // ownerDash routes
-const owner=require('./routes/ownerRoute')
-app.use('/api/owner',owner)
+const owner = require('./routes/ownerRoute');
+app.use('/api/owner', owner);
 
 // userDash routes
-const userDash=require('./routes/userDashRoute')
-app.use('/api/userDash',userDash)
+const userDash = require('./routes/userDashRoute');
+app.use('/api/userDash', userDash);
 
-// socket
-const socketController = require("./controller/SocketController");
-app.use('/api/owner',socketController)
+// Create HTTP server and Socket.IO instance
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
 
-// connection to the db
+// Socket controller
+require('./controller/SocketController')(io);
+
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-.then(()=>console.log("MongoDB Connected"))
-.catch(err=>console.log(`MongoDB connection error ${err}`))
+  .then(() => console.log(" MongoDB Connected"))
+  .catch(err => console.log(` MongoDB connection error: ${err}`));
 
-// listener
-const PORT = 3002
-app.listen(PORT,()=>{
-    console.log("Server Running on Port ",PORT)
-})
-
+// Start server
+const PORT = 3002;
+server.listen(PORT, () => {
+  console.log(` Server running on port ${PORT}`);
+});
