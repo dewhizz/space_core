@@ -48,13 +48,13 @@ const propertySchema = new Schema(
 
 
 
-const MessageSchema = new Schema({
+const messageSchema = new Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   text: String,
   timestamp: { type: Date, default: Date.now },
 });
 
-const InquirySchema = new Schema({
+const inquirySchema = new Schema({
   property: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
@@ -65,7 +65,7 @@ const InquirySchema = new Schema({
     enum: ["pending", "approved", "rejected"],
     default: "pending",
   },
-  messages: [MessageSchema], // real-time chat history
+  messages: [messageSchema], // real-time chat history
 }, { timestamps: true });
 
 
