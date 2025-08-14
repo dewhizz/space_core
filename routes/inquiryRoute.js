@@ -27,4 +27,4 @@ router.post("/:id/messages", auth, inquiryController.addMessageToInquiry);
 
 
 
-module.exports = router;
+module.exports = router; 
