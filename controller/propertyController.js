@@ -7,8 +7,8 @@ const path = require("path");
 // file location folder/directory
 const upload = multer({ dest: "uploads/" })
 
-// Middleware for handling photos upload
-exports.uploadPropertyPhotos = upload.array("photos", 5); 
+// Middleware for handling photo upload
+exports.uploadPropertyPhotos = upload.array("photo", 5); 
 
 
 exports.addProperty = async (req, res) => {
@@ -17,21 +17,21 @@ exports.addProperty = async (req, res) => {
     const { plotNumber, title, description } = req.body;
     const owner = req.user.userId; 
 
-    // Handle uploaded photos
-    let photos = [];
+    // Handle uploaded photo
+    let photo = [];
     if (req.file) {
       const ext = path.extname(req.file.originalname);
       const newFileName = Date.now() + ext;
       const newPath = path.join("uploads", newFileName);
       fs.renameSync(req.file.path, newPath);
-      photos = newPath.replace(/\\/g, "/"); // for Windows path compatibility
+      photo = newPath.replace(/\\/g, "/"); // for Windows path compatibility
     }
 
     // Create and save new property
     const savedProperty = new Property({
       plotNumber,
       title,
-      photos,
+      photo,
       description,
       owner,
     });
@@ -109,7 +109,7 @@ exports.updateProperty = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       const newPhotos = req.files.map((file) => file.path);
-      updateData.photos = [...(existingProperty.photos || []), ...newPhotos]; // merges new with existing
+      updateData.photo = [...(existingProperty.photo || []), ...newPhotos]; // merges new with existing
     }
 
     const updatedProperty = await Property.findByIdAndUpdate(
