@@ -14,7 +14,7 @@ exports.uploadPropertyPhotos = upload.array("photo", 5);
 exports.addProperty = async (req, res) => {
   try {
     console.log(req.body)
-    const { plotNumber, title, description } = req.body;
+    const propertyData = req.body;
     const owner = req.user.userId; 
 
     // Handle uploaded photo
@@ -28,13 +28,7 @@ exports.addProperty = async (req, res) => {
     }
 
     // Create and save new property
-    const savedProperty = new Property({
-      plotNumber,
-      title,
-      photos,
-      description,
-      owner,
-    });
+    const savedProperty = new Property({propertyData});
 
     await savedProperty.save();
 
