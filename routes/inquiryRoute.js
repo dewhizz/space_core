@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const inquiryController = require("../controllers/inquiryController");
+const inquiryController = require("../controller/inquiryController");
 
 // Auth middleware
 const { auth, authorizeRoles } = require("../middleware/auth");

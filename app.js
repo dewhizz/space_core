@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
-const socketIo = require('socket.io');
+// const socketIo = require('socket.io');
 require('dotenv').config();
 
 // middleware
@@ -37,17 +37,17 @@ app.use('/api/owner', owner);
 const userDash = require('./routes/userDashRoute');
 app.use('/api/userDash', userDash);
 
-// Create HTTP server and Socket.IO instance
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
-});
+// // Create HTTP server and Socket.IO instance
+// const server = http.createServer(app);
+// const io = socketIo(server, {
+//   cors: {
+//     origin: '*',
+//     methods: ['GET', 'POST']
+//   }
+// });
 
 // Socket controller
-require('./controller/SocketController')(io);
+// require('./controller/SocketController')(io);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -56,6 +56,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Start server
 const PORT = 3002;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(` Server running on port ${PORT}`);
 });

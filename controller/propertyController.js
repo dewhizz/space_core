@@ -8,7 +8,8 @@ const path = require("path");
 const upload = multer({ dest: "uploads/" })
 
 // Middleware for handling photo upload
-exports.uploadPropertyPhoto = upload.single("photo");
+exports.uploadPropertyPhotos = upload.array("photos", 5); 
+
 
 exports.addProperty = async (req, res) => {
   try {
@@ -87,34 +88,34 @@ exports.getPropertiesById = async (req, res) => {
   }
 };
 
-// Update a property
 exports.updateProperty = async (req, res) => {
   try {
     const ownerId = req.user.userId;
     const propertyId = req.params.id;
     const updateData = req.body;
 
-    // Check if the user is authenticated
     if (!ownerId) {
       return res.status(401).json({ message: "User not found" });
     }
 
-    // Check if the property exists
     const existingProperty = await Property.findById(propertyId);
     if (!existingProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    // Ensure the logged-in user is the owner of the property
-    if (existingProperty.owner.toString() !== req.user.userId) {
+    if (existingProperty.owner.toString() !== ownerId) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    // Perform the update
+    if (req.files && req.files.length > 0) {
+      const newPhotos = req.files.map((file) => file.path);
+      updateData.photos = [...(existingProperty.photos || []), ...newPhotos]; // merges new with existing
+    }
+
     const updatedProperty = await Property.findByIdAndUpdate(
       propertyId,
       updateData,
-      { new: true } // return the updated document
+      { new: true }
     );
 
     res.status(200).json({
@@ -125,6 +126,8 @@ exports.updateProperty = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // delete property
 exports.deleteProperties = async (req, res) => {
