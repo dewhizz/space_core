@@ -10,6 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+
 // static file accessibility
 app.use('/uploads', express.static('uploads'));
 
