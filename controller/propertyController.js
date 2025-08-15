@@ -18,20 +18,20 @@ exports.addProperty = async (req, res) => {
     const owner = req.user.userId; 
 
     // Handle uploaded photo
-    let photo = [];
+    let photos = [];
     if (req.file) {
       const ext = path.extname(req.file.originalname);
       const newFileName = Date.now() + ext;
       const newPath = path.join("uploads", newFileName);
       fs.renameSync(req.file.path, newPath);
-      photo = newPath.replace(/\\/g, "/"); // for Windows path compatibility
+      photos = newPath.replace(/\\/g, "/"); // for Windows path compatibility
     }
 
     // Create and save new property
     const savedProperty = new Property({
       plotNumber,
       title,
-      photo,
+      photos,
       description,
       owner,
     });
@@ -109,7 +109,7 @@ exports.updateProperty = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       const newPhotos = req.files.map((file) => file.path);
-      updateData.photo = [...(existingProperty.photo || []), ...newPhotos]; // merges new with existing
+      updateData.photos = [...(existingProperty.photos || []), ...newPhotos]; // merges new with existing
     }
 
     const updatedProperty = await Property.findByIdAndUpdate(
