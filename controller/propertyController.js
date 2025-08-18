@@ -54,11 +54,8 @@ exports.addProperty = async (req, res) => {
 // fetching all properties
 exports.getAllProperties = async (req, res) => {
   try {
-    const properties = await Property.find().populate(
-      "owner",
-      "name email phone"
-    );
-    // console.log('incoming',typeofres)
+    const properties = await Property.find()
+    .populate("owner", "name email phone");    // console.log('incoming',typeofres)
     res.json(properties);
   } catch (error) {
     res.status(500).json({ message: error.message });
