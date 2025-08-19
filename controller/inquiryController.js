@@ -69,22 +69,31 @@ exports.respondToInquiry = async (req, res) => {
   }
 };
 
-// Update Inquiry (User Only)
+// Update Inquiry 
 exports.updateInquiry = async (req, res) => {
   try {
-    const inquiry = await Inquiry.findById(req.params.id);
+    const inquiry = await Inquiry.findById(req.params.id).populate("property");
 
     if (!inquiry) {
       return res.status(404).json({ message: "Inquiry not found" });
     }
 
-    if (inquiry.user.toString() !== req.user.userId) {
+    const isUser = inquiry.user.toString() === req.user.userId;
+    const isOwner = inquiry.property.owner.toString() === req.user.userId;
+
+    if (!isUser && !isOwner) {
       return res.status(403).json({ message: "Unauthorized to update this inquiry" });
     }
 
-    const allowedUpdates = ["message"];
+    // Define allowed fields based on role
+    const allowedUpdates = isUser
+      ? ["message"] // users can update their message
+      : ["status", "response"]; // owners can update status and response
+
     allowedUpdates.forEach((field) => {
-      if (req.body[field]) inquiry[field] = req.body[field];
+      if (req.body[field] !== undefined) {
+        inquiry[field] = req.body[field];
+      }
     });
 
     await inquiry.save();
@@ -93,6 +102,7 @@ exports.updateInquiry = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Delete Inquiry (User Only)
 exports.deleteInquiry = async (req, res) => {
