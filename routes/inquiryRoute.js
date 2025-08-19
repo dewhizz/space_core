@@ -9,7 +9,7 @@ const { auth, authorizeRoles } = require("../middleware/auth");
 router.post("/", auth, authorizeRoles("user","owner"), inquiryController.addInquiry);
 
 // Get inquiries
-router.get("/my-inquiries", auth, authorizeRoles("user"), inquiryController.getUserInquiries);
+router.get("/my-inquiries", auth, authorizeRoles("user","owner"), inquiryController.getUserInquiries);
 router.get("/owner-inquiries", auth, authorizeRoles("owner"), inquiryController.getOwnerInquiries);
 
 // Update inquiry (User can update message, Owner can update status)
