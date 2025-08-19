@@ -6,7 +6,7 @@ const inquiryController = require("../controller/inquiryController");
 const { auth, authorizeRoles } = require("../middleware/auth");
 
 // Create inquiry (User only)
-router.post("/", auth, authorizeRoles("user"), inquiryController.addInquiry);
+router.post("/", auth, authorizeRoles("user","owner"), inquiryController.addInquiry);
 
 // Get inquiries
 router.get("/my-inquiries", auth, authorizeRoles("user"), inquiryController.getUserInquiries);
