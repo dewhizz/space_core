@@ -6,6 +6,6 @@ const ownerDash = require("../controller/ownerDash")
 // authorization
 const { auth, authorizeRoles } = require("../middleware/auth")
 
-router.get("/owner-dash",auth,ownerDash.ownerDashStats);
+router.get("/owner-dash",auth,authorizeRoles('owner'),ownerDash.ownerDashStats);
 
 module.exports = router;
