@@ -62,7 +62,7 @@ const inquirySchema = new Schema({
   response: String,       // owner's reply
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected"],
+    enum: ["pending", "approved", "declined"],
     default: "pending",
   },
   messages: [messageSchema], // real-time chat history
