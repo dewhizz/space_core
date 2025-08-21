@@ -92,8 +92,8 @@ exports.updateBooking = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    const isUser = role === "user" && booking.user.toString() === userId;
-    const isOwner = role === "owner" && booking.owner.toString() === userId;
+    const isUser = role === "user" && booking.user === userId;
+    const isOwner = role === "owner" && booking.owner === userId;
 
     if (!isUser && !isOwner) {
       return res.status(403).json({ message: "Unauthorized to update this booking" });
