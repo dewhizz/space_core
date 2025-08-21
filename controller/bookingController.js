@@ -144,50 +144,50 @@ exports.deleteBooking = async (req, res) => {
   }
 };
 
-exports.respondToBooking = async (req, res) => {
-  try {
-    const ownerId = req.user.userId;
-    const booking = await Booking.findById(req.params.id).populate("property");
+// exports.respondToBooking = async (req, res) => {
+//   try {
+//     const ownerId = req.user.userId;
+//     const booking = await Booking.findById(req.params.id).populate("property");
 
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
+//     if (!booking) {
+//       return res.status(404).json({ message: "Booking not found" });
+//     }
 
-    //  Check ownership
-    if (booking.property.owner.toString() !== ownerId) {
-      return res.status(403).json({ message: "Unauthorized: You don't own this property." });
-    }
+//     //  Check ownership
+//     if (booking.property.owner.toString() !== ownerId) {
+//       return res.status(403).json({ message: "Unauthorized: You don't own this property." });
+//     }
 
-    const { status, agreementUrl } = req.body;
-    const allowedStatuses = ["approved", "rejected", "confirmed"];
+//     const { status, agreementUrl } = req.body;
+//     const allowedStatuses = ["approved", "rejected", "confirmed"];
 
-    if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status. Must be one of: approved, rejected, confirmed." });
-    }
+//     if (!allowedStatuses.includes(status)) {
+//       return res.status(400).json({ message: "Invalid status. Must be one of: approved, rejected, confirmed." });
+//     }
 
-    //  If confirming, validate agreement URL
-    if (status === "confirmed") {
-      if (!agreementUrl || !agreementUrl.startsWith("http")) {
-        return res.status(400).json({ message: "Agreement URL is required and must be valid when confirming." });
-      }
-      booking.agreementUrl = agreementUrl;
-      booking.confirmedAt = new Date();
-    } else {
-      booking.agreementUrl = null; // Clear if not confirmed
-      booking.confirmedAt = null;
-    }
+//     //  If confirming, validate agreement URL
+//     if (status === "confirmed") {
+//       if (!agreementUrl || !agreementUrl.startsWith("http")) {
+//         return res.status(400).json({ message: "Agreement URL is required and must be valid when confirming." });
+//       }
+//       booking.agreementUrl = agreementUrl;
+//       booking.confirmedAt = new Date();
+//     } else {
+//       booking.agreementUrl = null; // Clear if not confirmed
+//       booking.confirmedAt = null;
+//     }
 
-    booking.status = status;
-    await booking.save();
+//     booking.status = status;
+//     await booking.save();
 
-    //  Notify user
-    notifyUser(booking.user, `Your booking has been ${status}`, agreementUrl);
+//     //  Notify user
+//     notifyUser(booking.user, `Your booking has been ${status}`, agreementUrl);
 
-    res.status(200).json({
-      message: `Booking ${status} successfully`,
-      booking,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+//     res.status(200).json({
+//       message: `Booking ${status} successfully`,
+//       booking,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
