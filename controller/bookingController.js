@@ -81,24 +81,34 @@ exports.getBookingsForMyProperties = async (req, res) => {
   }
 };
 
-//  Update Booking (Only by creator)
+// Update Booking (User: startDate/endDate | Owner: status)
 exports.updateBooking = async (req, res) => {
   try {
     const userId = req.user.userId;
+    const role = req.user.role; // Assuming role is either 'user' or 'owner'
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    if (booking.user.toString() !== userId) {
+    const isUser = role === "user" && booking.user.toString() === userId;
+    const isOwner = role === "owner" && booking.owner.toString() === userId;
+
+    if (!isUser && !isOwner) {
       return res.status(403).json({ message: "Unauthorized to update this booking" });
     }
 
-    const allowedUpdates = ["startDate", "endDate"];
-    allowedUpdates.forEach((field) => {
-      if (req.body[field]) booking[field] = req.body[field];
-    });
+    if (isUser) {
+      const allowedUserUpdates = ["startDate", "endDate"];
+      allowedUserUpdates.forEach((field) => {
+        if (req.body[field]) booking[field] = req.body[field];
+      });
+    }
+
+    if (isOwner) {
+      if (req.body.status) booking.status = req.body.status;
+    }
 
     await booking.save();
     res.status(200).json({ message: "Booking updated successfully", booking });
