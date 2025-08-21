@@ -8,14 +8,14 @@ const path = require("path");
 const upload = multer({ dest: "uploads/" })
 
 // Middleware for handling photo upload
-exports.uploadPropertyPhoto = upload.single("Photo"); 
+exports.uploadPropertyPhoto = upload.single("Photo");
 
 
 exports.addProperty = async (req, res) => {
   try {
     console.log(req.body)
     const propertyData = req.body;
-    const owner = req.user.userId; 
+    const owner = req.user.userId;
 
     // Handle uploaded photo
     let photo = [];
@@ -28,7 +28,11 @@ exports.addProperty = async (req, res) => {
     }
 
     // Create and save new property
-    const savedProperty = new Property({propertyData});
+    const savedProperty = new Property({
+      ...propertyData,
+      owner,
+      photo,
+    });
 
     await savedProperty.save();
 
@@ -55,7 +59,7 @@ exports.addProperty = async (req, res) => {
 exports.getAllProperties = async (req, res) => {
   try {
     const properties = await Property.find()
-    .populate("owner", "name email phone");    // console.log('incoming',typeofres)
+      .populate("owner", "name email phone");    // console.log('incoming',typeofres)
     res.json(properties);
   } catch (error) {
     res.status(500).json({ message: error.message });
