@@ -11,7 +11,7 @@ router.post("/:id",auth,bookingController.addBooking)
 // user
 router.get("/my-bookings",auth,bookingController.getMyBookings);
 
-// router.put("/owner/:id",auth,authorizeRoles('owner'),bookingController.respondToBooking);
+
 
 // owner
 router.get("/owner-bookings", auth,authorizeRoles('owner'), bookingController.getBookingsForMyProperties);
