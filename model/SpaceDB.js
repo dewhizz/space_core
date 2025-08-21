@@ -34,7 +34,7 @@ const propertySchema = new Schema(
     location: { type: String },
     rentAmount: { type: String },
     depositAmount: { type: String },
-    photos: { type: String },
+    photo: { type: String },
     isAvailable: { type: Boolean, default: true },
     status: {
       type: String,
