@@ -85,7 +85,7 @@ exports.getBookingsForMyProperties = async (req, res) => {
 exports.updateBooking = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const role = req.user.role; // Assuming role is either 'user' or 'owner'
+    const role = req.user.role; // 'user' or 'owner'
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
@@ -99,6 +99,7 @@ exports.updateBooking = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized to update this booking" });
     }
 
+    // User can update startDate and endDate
     if (isUser) {
       const allowedUserUpdates = ["startDate", "endDate"];
       allowedUserUpdates.forEach((field) => {
@@ -106,8 +107,16 @@ exports.updateBooking = async (req, res) => {
       });
     }
 
-    if (isOwner) {
-      if (req.body.status) booking.status = req.body.status;
+    // Owner can update status
+    if (isOwner && req.body.status) {
+      const newStatus = req.body.status;
+
+      // Prevent booking unless inquiry is approved
+      if (newStatus === "booked" && booking.status !== "approved") {
+        return res.status(400).json({ message: "Cannot book unless inquiry is approved" });
+      }
+
+      booking.status = newStatus;
     }
 
     await booking.save();
@@ -116,6 +125,7 @@ exports.updateBooking = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 //  Delete Booking (Only by creator)
 exports.deleteBooking = async (req, res) => {
