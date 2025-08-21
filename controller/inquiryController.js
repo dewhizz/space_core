@@ -134,7 +134,7 @@ exports.getUserInquiries = async (req, res) => {
     if (status) filter.status = status;
 
     const inquiries = await Inquiry.find(filter)
-      .populate("property", "title")
+      .populate("property")
       .sort({ createdAt: -1 });
 
     res.status(200).json(inquiries);
