@@ -4,46 +4,45 @@ exports.getUserDashboardStats = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    // Run counts in parallel
-    const [totalInquiries, totalBookings] = await Promise.all([
+    // Run count operations in parallel
+    const [totalInquires, totalBookings] = await Promise.all([
       Inquiry.countDocuments({ user: userId }),
       Booking.countDocuments({ user: userId }),
     ]);
 
-    // Recent inquiries with property title and image
+    // Get recent inquiries (sorted by newest)
     const recentInquiries = await Inquiry.find({ user: userId })
       .sort({ createdAt: -1 })
       .limit(5)
-      .populate("property")
-      .lean();
+      .populate("property");
 
-    // Recent bookings with property title and image
+    // Get recent bookings (sorted by newest)
     const recentBookings = await Booking.find({ user: userId })
       .sort({ createdAt: -1 })
       .limit(5)
-      .populate("property")
-      .lean();
+      .populate("property");
 
-    // Format response
+    // Return all stats
     res.status(200).json({
-      totalInquiries,
+      totalInquires, // ✅ matches frontend expectation
       totalBookings,
-      recentInquiries: recentInquiries.map((inq) => ({
-        propertyTitle: inq.property?.title || "N/A",
-        propertyImage: inq.property?.image || null,
-        message: inq.message,
-        response: inq.response,
-        status: inq.status,
+      recentInquiries: recentInquiries.map((inquiry) => ({
+        propertyTitle: inquiry.property?.title || "N/A",
+        propertyImage: inquiry.property?.photo || null,
+        message: inquiry.message || "",
+        response: inquiry.response || "",
+        status: inquiry.status || "pending",
       })),
-      recentBookings: recentBookings.map((book) => ({
-        propertyTitle: book.property?.title || "N/A",
-        propertyImage: book.property?.image || null,
-        startDate: book.startDate,
-        endDate: book.endDate,
-        status: book.status,
+      recentBookings: recentBookings.map((booking) => ({
+        propertyTitle: booking.property?.title || "N/A",
+        propertyImage: booking.property?.photo || null,
+        startDate: booking.startDate,
+        endDate: booking.endDate,
+        status: booking.status || "pending",
       })),
     });
   } catch (error) {
-    res.status(500).json({ message: error.message || "Failed to fetch dashboard stats" });
+    console.error("Error fetching user dashboard stats:", error);
+    res.status(500).json({ message: error.message });
   }
 };
