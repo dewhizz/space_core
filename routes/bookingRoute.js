@@ -11,12 +11,12 @@ router.post("/:id",auth,bookingController.addBooking)
 // user
 router.get("/my-bookings",auth,bookingController.getMyBookings);
 
-router.put("/owner/:id",auth,authorizeRoles('owner'),bookingController.respondToBooking);
+// router.put("/owner/:id",auth,authorizeRoles('owner'),bookingController.respondToBooking);
 
 // owner
 router.get("/owner-bookings", auth,authorizeRoles('owner'), bookingController.getBookingsForMyProperties);
 
-router.put("/:id",auth,bookingController.updateBooking);
+router.put("/:id",auth,authorizeRoles('user','owner'),bookingController.updateBooking);
 
 router.delete("/:id",auth,bookingController.deleteBooking);
 module.exports = router;
