@@ -14,14 +14,14 @@ exports.getUserDashboardStats = async (req, res) => {
     const recentInquiries = await Inquiry.find({ user: userId })
       .sort({ createdAt: -1 })
       .limit(5)
-      .populate("property", "title image")
+      .populate("property")
       .lean();
 
     // Recent bookings with property title and image
     const recentBookings = await Booking.find({ user: userId })
       .sort({ createdAt: -1 })
       .limit(5)
-      .populate("property", "title image")
+      .populate("property")
       .lean();
 
     // Format response
