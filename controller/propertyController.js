@@ -55,7 +55,6 @@ exports.addProperty = async (req, res) => {
 exports.getAllProperties = async (req, res) => {
   try {
     const properties = await Property.find()
-    .populate('property')
     .populate("owner", "name email phone");    // console.log('incoming',typeofres)
     res.json(properties);
   } catch (error) {
