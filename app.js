@@ -28,7 +28,7 @@ app.use('/api/inquiries', inquiries);
 
 // booking routes
 const booking = require('./routes/bookingRoute');
-app.use('/api/booking', booking);
+app.use('/api/bookings', booking);
 
 // ownerDash routes
 const owner = require('./routes/ownerRoute');
