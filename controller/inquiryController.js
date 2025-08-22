@@ -20,7 +20,7 @@ exports.addInquiry = async (req, res) => {
     const newInquiry = new Inquiry({
       user: userId,
       property,
-      message,
+      message:req.body,
       status: "pending",
     });
 
