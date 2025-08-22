@@ -1,33 +1,37 @@
 const { Property, User } = require("../model/SpaceDB");
-
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
-// file location folder/directory
-const upload = multer({ dest: "uploads/" })
+// Multer storage setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
+  },
+});
 
-// Middleware for handling photo upload
-exports.uploadPropertyPhoto = upload.single("Photo");
+const upload = multer({ storage });
 
+// Middleware factory for photo upload
+exports.uploadPropertyPhoto = (fieldName) => {
+  return upload.single(fieldName);
+};
 
+// Add Property
 exports.addProperty = async (req, res) => {
   try {
-    console.log(req.body)
     const propertyData = req.body;
     const owner = req.user.userId;
 
-    // Handle uploaded photo
-    let photo = [];
+    let photo = "";
     if (req.file) {
-      const ext = path.extname(req.file.originalname);
-      const newFileName = Date.now() + ext;
-      const newPath = path.join("uploads", newFileName);
-      fs.renameSync(req.file.path, newPath);
-      photo = newPath.replace(/\\/g, "/"); // for Windows path compatibility
+      photo = req.file.path.replace(/\\/g, "/");
     }
 
-    // Create and save new property
     const savedProperty = new Property({
       ...propertyData,
       owner,
@@ -36,14 +40,12 @@ exports.addProperty = async (req, res) => {
 
     await savedProperty.save();
 
-    //  Update user's role to "owner" if needed
     const user = await User.findById(owner);
     if (user && user.role !== "owner") {
       user.role = "owner";
       await user.save();
     }
 
-    // Send updated user and property in response
     res.status(201).json({
       message: "Property added successfully",
       savedProperty,
@@ -55,90 +57,58 @@ exports.addProperty = async (req, res) => {
   }
 };
 
-// fetching all properties
-exports.getAllProperties = async (req, res) => {
-  try {
-    const properties = await Property.find()
-      .populate("owner", "name email phone");    // console.log('incoming',typeofres)
-    res.json(properties);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// get one
-exports.getPropertiesById = async (req, res) => {
-  try {
-    const property = await Property.findById(req.params.id).populate(
-      "owner",
-      "name email phone"
-    );
-    console.log("inc", property);
-    // check if the property exsists
-    if (!property)
-      return res.status(404).json({ message: "property not found" });
-    res.status(200).json(property);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
+// Update Property
 exports.updateProperty = async (req, res) => {
   try {
     const ownerId = req.user.userId;
     const propertyId = req.params.id;
     const updateData = req.body;
 
-    if (!ownerId) {
-      return res.status(401).json({ message: "User not found" });
-    }
+    if (!ownerId) return res.status(401).json({ message: "User not found" });
 
     const existingProperty = await Property.findById(propertyId);
-    if (!existingProperty) {
-      return res.status(404).json({ message: "Property not found" });
-    }
+    if (!existingProperty) return res.status(404).json({ message: "Property not found" });
 
-    if (existingProperty.owner.toString() !== ownerId) {
+    if (existingProperty.owner.toString() !== ownerId)
       return res.status(403).json({ message: "Unauthorized" });
-    }
+
     if (req.file) {
-      const ext = path.extname(req.file.originalname);
-      const newFileName = Date.now() + ext;
-      const newPath = path.join("uploads", newFileName);
-      fs.renameSync(req.file.path, newPath);
-      updateData.photo = newPath.replace(/\\/g, "/");
+      if (existingProperty.photo) {
+        fs.unlink(existingProperty.photo, (err) => {
+          if (err) console.error("Failed to delete old photo:", err);
+        });
+      }
+
+      updateData.photo = req.file.path.replace(/\\/g, "/");
     }
 
-    const updatedProperty = await Property.findByIdAndUpdate(
-      propertyId,
-      updateData,
-      { new: true }
-    );
+    const updatedProperty = await Property.findByIdAndUpdate(propertyId, updateData, { new: true });
 
     res.status(200).json({
       message: "Property updated successfully",
       updatedProperty,
     });
   } catch (error) {
+    console.error("Error updating property:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-
-
-// delete property
+// Delete Property
 exports.deleteProperties = async (req, res) => {
   try {
-    // find the property by id first
     const property = await Property.findById(req.params.id);
-    if (!property)
-      return res.status(404).json({ message: "Property Not Found" });
+    if (!property) return res.status(404).json({ message: "Property Not Found" });
 
-    // check ownership before deleting
     if (property.owner.toString() !== req.user.userId)
       return res.status(403).json({ message: "Unauthorized Action" });
 
-    // delete the property
+    if (property.photo) {
+      fs.unlink(property.photo, (err) => {
+        if (err) console.error("Failed to delete photo:", err);
+      });
+    }
+
     await Property.findByIdAndDelete(req.params.id);
     res.json({ message: "Property deleted successfully" });
   } catch (error) {
@@ -146,60 +116,61 @@ exports.deleteProperties = async (req, res) => {
   }
 };
 
-// transfer Property Ownership
+// Transfer Property Ownership
 exports.updatePropertyOwnership = async (req, res) => {
   try {
     const currentOwner = req.user.userId;
     const propertyId = req.params.id;
-    const newOwnerId = req.body;
+    const { newOwnerId } = req.body;
 
-    // find the property
     const property = await Property.findById(propertyId);
-    if (!property)
-      return res.status(404).json({ message: "Property Not Found" });
+    if (!property) return res.status(404).json({ message: "Property Not Found" });
 
-    // check if the current owner exists
-    if (property.owner.toString() !== currentOwner) {
+    if (property.owner.toString() !== currentOwner)
       return res.status(403).json({ message: "Unauthorized transfer request" });
-    }
 
-    // verify existence of the new owner
-    const newOwner = await User.findOne(newOwnerId);
-    if (!newOwner) {
-      return res.status(404).json({ message: "User Not found please sign up" });
-    }
+    const newOwner = await User.findById(newOwnerId);
+    if (!newOwner) return res.status(404).json({ message: "User Not found please sign up" });
 
-    // transfer the ownership
-    property.currentOwner = newOwner;
+    property.owner = newOwner._id;
     await property.save();
 
-    res
-      .status(200)
-      .json({ message: "Ownership transfer successfull", property });
+    res.status(200).json({ message: "Ownership transfer successful", property });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+// Get All Properties
+exports.getAllProperties = async (req, res) => {
+  try {
+    const properties = await Property.find().populate("owner", "name email phone");
+    res.json(properties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-// Get properties owned by the logged-in user
+// Get Property by ID
+exports.getPropertiesById = async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id).populate("owner", "name email phone");
+    if (!property) return res.status(404).json({ message: "Property not found" });
+    res.status(200).json(property);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get Properties Owned by Logged-in User
 exports.getOwnerProperties = async (req, res) => {
   try {
     const ownerId = req.user.userId;
-    if (!ownerId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    if (!ownerId) return res.status(401).json({ message: "Unauthorized" });
 
-    const properties = await Property.find({ owner: ownerId }).populate(
-      "owner",
-      "name email phone"
-    );
-
+    const properties = await Property.find({ owner: ownerId }).populate("owner", "name email phone");
     res.status(200).json(properties);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
