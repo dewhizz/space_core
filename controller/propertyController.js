@@ -101,10 +101,12 @@ exports.updateProperty = async (req, res) => {
     if (existingProperty.owner.toString() !== ownerId) {
       return res.status(403).json({ message: "Unauthorized" });
     }
-
-    if (req.files && req.files.length > 0) {
-      const newPhoto = req.files.map((file) => file.path);
-      updateData.photo = [...(existingProperty.photo || []), ...newPhoto]; // merges new with existing
+    if (req.file) {
+      const ext = path.extname(req.file.originalname);
+      const newFileName = Date.now() + ext;
+      const newPath = path.join("uploads", newFileName);
+      fs.renameSync(req.file.path, newPath);
+      updateData.photo = newPath.replace(/\\/g, "/");
     }
 
     const updatedProperty = await Property.findByIdAndUpdate(
