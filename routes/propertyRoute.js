@@ -6,12 +6,12 @@ const propertyController = require("../controller/propertyController")
 // authorization
 const { auth, authorizeRoles } = require("../middleware/auth");
 
-router.post("/",auth,propertyController.uploadPropertyPhoto,propertyController.addProperty);
+router.post("/",auth,propertyController.uploadPropertyPhoto('photo'),propertyController.addProperty);
 
 router.get("/owner-properties",auth,authorizeRoles('owner'), propertyController.getOwnerProperties);
 router.get("/", propertyController.getAllProperties);
 
-router.put("/:id",auth,authorizeRoles('owner'),propertyController.uploadPropertyPhoto,propertyController.updateProperty);
+router.put("/:id",auth,authorizeRoles('owner'),propertyController.uploadPropertyPhoto('photo'),propertyController.updateProperty);
 router.delete("/:id",auth,authorizeRoles('owner'),propertyController.deleteProperties);
 
 // transfer ownership
